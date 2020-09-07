@@ -1,0 +1,65 @@
+server:
+   port: 8201
+   host: 127.0.0.1
+   public:
+      host: public.server.com
+spring:
+   application:
+      name: kafka-notify-service
+   kafka:
+      bootstrap-servers: kafka-host.com:9092   
+   cloud:
+      config:
+         discovery:
+            enabled: true
+      bus:
+         refresh:
+            enabled: true
+         enabled: true            
+logging:
+   level:
+      com.chihuo.notify: debug
+eureka:
+   client:
+      service-url:
+         defaultZone: http://eureka-server01.com:7001/eureka,http://eureka-server02.com:7002/eureka
+   instance:
+      hostname: ${spring.cloud.client.ip-address}
+      prefer-ip-address: true      #以IP地址注册到服务中心
+      instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}:${project.version}      #eureka显示的instanceId
+      #ip-address: ${server.public.host}      #公网ip，如果是服务内网调用不需要声明这个
+      #non-secure-port: ${server.port}      #公网端口，如果是服务内网调用不需要声明这个
+      lease-expiration-duration-in-seconds: 15      #服务过期时间配置,超过这个时间没有接收到心跳EurekaServer就会将这个实例剔除
+      lease-renewal-interval-in-seconds: 5      #服务刷新时间配置，每隔这个时间会主动心跳一次
+   healthcheck:
+      enabled: true # 启用健康检查,注意:需要引用spring boot actuator
+info:
+   app:
+      name: ${project.artifactId}
+      encoding: ${project.build.sourceEncoding}
+   company:
+      name: ${project.description}
+   build:
+      artifactId: ${project.artifactId}
+      version: ${project.version}
+#============== kafka ===================
+kafka:
+   producer:
+      servers: kafka-host.com:9092
+      retries: 0
+      batch-size: 4096
+      linger: 1
+      buffer-memory: 40960
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+   consumer:
+      servers: kafka-host.com:9092
+      group-id: food-group
+      enable-auto-commit: true
+      auto-commit-interval: 100
+      auto-offset-reset: earliest
+      session-timeout: 6000
+      topic: food
+      concurrency: 10
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer

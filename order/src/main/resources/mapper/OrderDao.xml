@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chihuo.sharding.domain.order.repository.mapper.OrderDao">
+
+	<resultMap type="com.chihuo.sharding.domain.order.repository.po.OrderPO" id="orderResultMap">
+		<result property="uid" column="UID"/>
+		<result property="userId" column="USER_ID"/>
+		<result property="sellerId" column="SELLER_ID"/>
+		<result property="orderAmount" column="ORDER_AMOUNT"/>
+		<result property="hongbaoAmount" column="HONGBAO_AMOUNT"/>
+		<result property="createTime" column="CREATE_TIME"/>
+        <collection property="itemList"
+					select="com.chihuo.sharding.domain.order.repository.mapper.OrderItemDao.findOrderItemListByOrderId"
+					column="{orderId=uid}"  >
+        </collection>
+	</resultMap>
+
+	<insert id="save" useGeneratedKeys="false" keyProperty="uid" parameterType="com.chihuo.sharding.domain.order.repository.po.OrderPO">
+		  insert into f_order (
+				uid,
+				user_id,
+				seller_id,
+				order_amount,
+				hongbao_amount,
+				create_time
+		  ) values (
+		    	#{orderPO.uid},
+		    	#{orderPO.userId},
+		    	#{orderPO.sellerId},
+		    	#{orderPO.orderAmount},
+		    	#{orderPO.hongbaoAmount},
+	            NOW()
+		  )
+	</insert>
+	
+	<select id="findOrderList" resultType="com.chihuo.sharding.domain.order.repository.po.OrderPO">
+		select uid uid,
+		       user_id userId,
+		       seller_id sellerId,
+		       order_amount orderAmount,
+		       hongbao_amount hongbaoAmount,
+		       create_time createTime
+		from  f_order      
+	</select>
+
+	<select id="countOrderList" resultType="int">
+		select count(*) from f_order      
+	</select>
+	
+	<select id="findOrderListByUserId" resultMap="orderResultMap">
+		select uid,
+		       user_id,
+		       seller_id,
+		       order_amount,
+		       hongbao_amount,
+		       create_time
+		from  f_order
+		where user_id = #{userId} 
+	</select>
+
+	<select id="findOrderListBySellerId" resultMap="orderResultMap">
+		select uid,
+		       user_id,
+		       seller_id,
+		       order_amount,
+		       hongbao_amount,
+		       create_time
+		from  f_order
+		where seller_id = #{sellerId} 
+	</select>
+
+	<select id="findOrderById" resultMap="orderResultMap">
+		select uid,
+		       user_id,
+		       seller_id,
+		       order_amount,
+		       hongbao_amount,
+		       create_time
+		from  f_order
+		where uid = #{uid} 
+	</select>
+	
+	<select id="refreshSellerIdOrderList" resultMap="orderResultMap">
+		select uid,
+		       user_id,
+		       seller_id,
+		       order_amount,
+		       hongbao_amount,
+		       create_time
+		from  f_order      
+		where seller_id is null 
+		<if test="userId != null" >
+			and user_id = #{userId}
+		</if>
+	</select>
+
+	<select id="countRefreshSellerIdOrderList" resultType="int">
+		select count(*) 
+		from f_order 
+		where seller_id is null 
+		<if test="userId != null" >
+			and user_id = #{userId}
+		</if>
+	</select>
+	
+	<update id="updateOrder" parameterType="com.chihuo.sharding.domain.order.repository.po.OrderPO">
+        update f_order
+          <set>
+              <if test="item.sellerId != null" >
+                  seller_id = #{item.sellerId,jdbcType=BIGINT},
+              </if>
+              <if test="item.orderAmount != null" >
+                  order_amount = #{item.orderAmount,jdbcType=DECIMAL},
+              </if>
+              <if test="item.hongbaoAmount != null" >
+                  hongbao_amount = #{item.hongbaoAmount,jdbcType=DECIMAL},
+              </if>
+           </set>
+         where uid = #{item.uid,jdbcType=BIGINT} and user_id = #{item.userId,jdbcType=BIGINT}
+    </update>
+	
+</mapper>

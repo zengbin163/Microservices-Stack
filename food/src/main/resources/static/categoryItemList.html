@@ -1,0 +1,387 @@
+<html>
+	<head>
+		<title>美食分类属性库列表</title> 
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
+		<link rel="stylesheet" type="text/css" href="/common/css/themes/default/easyui.css">
+		<link rel="stylesheet" type="text/css" href="/common/css/themes/icon.css">
+		<link rel="stylesheet" type="text/css" href="/common/css/food.css" />
+		<script type="text/javascript" src="/common/js/jquery.min.js"></script>
+		<script type="text/javascript" src="/common/js/jquery.easyui.min.js"></script>
+		<script type="text/javascript" src="/common/js/easyui-lang-zh_CN.js"></script>
+		<script type="text/javascript" src="/category/initCategory.js"></script>
+		<script type="text/javascript">
+			var host = 'http://127.0.0.1:8085';
+			var reqUrl = host + '/categoryItem/findItemList';
+		</script>
+	</head>
+	<body>
+		<h2>美食分类属性库</h2>
+		<p>按条件查询您的分类属性库</p>
+		<div style="text-align:left;margin-bottom:20px">
+			<select class="easyui-combobox" id="categoryTypeId" name="categoryTypeId" style="width:200px" ></select>
+			<select class="easyui-combobox" id="firstCategoryId" name="firstCategoryId" style="width:200px" ></select>
+			<select class="easyui-combobox" id="secondCategoryId" name="secondCategoryId" style="width:200px" ></select>
+			<input class="easyui-textbox" id="itemName" name="itemName" style="width:250px" data-options="
+					label:'分类属性名称:',
+					required:false,
+					labelWidth:'100px'" />
+			<a href="javascript:void(0)" class="easyui-linkbutton" onclick="queryList()" style="width:80px">查询</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearList()" style="width:80px">清除</a>
+		</div>
+		<table id="categoryItemList" title="分类属性" style="width:1200px;height:425px"
+			   data-options="rownumbers:true,singleSelect:true,pagination:true,fitcolumns:true,scrollbarSize:0">
+			<thead>
+				<tr>
+					<th data-options="field:'categoryTypeId',width:150,align:'center', 
+									     formatter:function(value,rec){
+									         return rec.categoryType.id;
+									     }">美食分类大类id</th>
+					<th data-options="field:'categoryType.typeName',width:150,align:'center', 
+									     formatter:function(value,rec){
+									         return rec.categoryType.typeName;
+									     }">美食分类大类名称</th>
+					<th data-options="field:'parentCategoryId',width:150,align:'center',
+										 formatter:function(value,rec){
+									         return rec.parentCategory.id;
+									     }">美食一级分类id</th>
+					<th data-options="field:'parentCategoryName',width:150,align:'center',
+										 formatter:function(value,rec){
+									         return rec.parentCategory.categoryName;
+									     }">美食一级分类名称</th>
+					<th data-options="field:'categoryId',width:150,align:'center',
+										 formatter:function(value,rec){
+									         return rec.category.id;
+									     }">美食二级分类id</th>
+					<th data-options="field:'categoryName',width:150,align:'center',
+										 formatter:function(value,rec){
+									         return rec.category.categoryName;
+									     }">美食二级分类名称</th>
+					<th data-options="field:'id',width:100,align:'center'">分类属性id</th>
+					<th data-options="field:'itemName',width:150,align:'center'">分类属性名称</th>
+				</tr>
+			</thead>
+		</table>
+		
+		<div id="dialogDivId" title="新增分类属性" style="width:100%;max-width:350px;padding:30px 60px;display:none;">
+			<form id="dialogCategoryItemForm" method="post">
+				<div style="margin-bottom:20px">
+					<select class="easyui-combobox" id="dialogFirstCategoryId" name="dialogFirstCategoryId" style="width:200px" ></select>
+				</div>
+				<div style="margin-bottom:20px">
+					<select class="easyui-combobox" id="dialogSecondCategoryId" name="dialogSecondCategoryId" style="width:200px" ></select>
+				</div>
+				<div style="margin-bottom:20px">
+					<input class="easyui-textbox" id="dialogItemName" name="dialogItemName" style="width:200px" data-options="
+							label:'属性名称:',
+							required:true,
+							labelWidth:'70px'" />
+				</div>
+			</form>
+			<div style="text-align:center;padding:5px 0">
+				<a href="javascript:void(0)" class="easyui-linkbutton" onclick="saveCategoryItem()" style="width:80px">保存</a>
+			</div>
+		</div>
+
+		<div id="dialogEditDivId" title="编辑分类属性" style="width:100%;max-width:350px;padding:30px 60px;display:none;">
+			<form id="dialogEditCategoryItemForm" method="post">
+				<div style="margin-bottom:20px">
+					<select class="easyui-combobox" id="dialogEditFirstCategoryId" name="dialogEditFirstCategoryId" style="width:200px" ></select>
+				</div>
+				<div style="margin-bottom:20px">
+					<select class="easyui-combobox" id="dialogEditSecondCategoryId" name="dialogEditSecondCategoryId" style="width:200px" ></select>
+				</div>
+				<div style="margin-bottom:20px">
+					<input class="easyui-textbox" id="dialogEditItemName" name="dialogEditItemName" style="width:200px" data-options="
+							label:'属性名称:',
+							required:true,
+							labelWidth:'70px'" />
+				</div>
+			</form>
+			<div style="text-align:center;padding:5px 0">
+				<a href="javascript:void(0)" class="easyui-linkbutton" onclick="editCategoryItem()" style="width:80px">保存</a>
+			</div>
+		</div>
+		
+		<script type="text/javascript">
+		    //美食分类大类初始化
+			$('#categoryTypeId').combobox({
+			    url: host + '/categoryType/findList',
+				method:'get',
+			    valueField:'id',
+			    textField:'typeName',
+				panelHeight:'auto',
+				label: '美食大类:',
+				labelPosition: 'right',
+				required:false,
+				labelWidth:'70px'
+			});
+			//初始化一级类目和二级类目
+			initSaveFirstCategory('firstCategoryId', 'secondCategoryId');
+			initSaveSecondCategory('secondCategoryId');
+
+			//datagrid界面初始化
+			$(function() {
+				var pager = $('#categoryItemList').datagrid().datagrid('getPager');
+				pager.pagination({
+					buttons:[{
+						iconCls:'icon-search',
+						handler:function(){
+				        	$.messager.alert('search', '搜索引擎还在维护中');
+						}
+					},{
+						iconCls:'icon-add',
+						handler:function(){
+							saveCategoryItemPreview();
+						}
+					},{
+						iconCls:'icon-edit',
+						handler:function(){
+							editCategoryItemPreview();
+						}
+					},{
+						iconCls:'icon-remove',
+						handler:function(){
+							deleteCategoryItem();
+						}
+					}]
+				});			
+			})
+			
+			function queryList(pageNum, pageSize) {
+				var categoryTypeId = $('#categoryTypeId').combobox('getValue');
+				var firstCategoryId = $('#firstCategoryId').combobox('getValue');
+				var secondCategoryId = $('#secondCategoryId').combobox('getValue');
+				var itemName = $('#itemName').textbox('getValue');
+				var current = pageNum;
+				var size = pageSize;
+				var opts = $('#categoryItemList').datagrid('options');
+				if(current == '' || current == undefined) {
+					current = opts.pageNumber;
+				}
+				if(size == '' || size == undefined) {
+					size = opts.pageSize;
+				}
+				var requestParam = {
+					'categoryTypeId':categoryTypeId,
+					'firstCategoryId':firstCategoryId,
+					'secondCategoryId':secondCategoryId,
+					'itemName':encodeURIComponent(itemName),
+					'current':current,
+					'size':size					
+				};
+				$.ajax({
+				    type:"POST",                      //请求类型
+				    url:reqUrl,                       //URL
+				    data:JSON.stringify(requestParam),//传递的参数
+				    dataType:"json",                  //返回的数据类型
+				    success:function(data) {          //data就是返回的json类型的数据
+				    	$('#categoryItemList').datagrid({
+												    		fitcolumns:true,
+												            scrollbarSize:0,
+												            rownumbers:true,
+															singleSelect:true,
+															pagination:true,
+															loadMsg:"加载中"			        								   
+													   })
+										 			  .datagrid('loadData', {
+															rows:data.records
+													   });
+				        var pager = $('#categoryItemList').datagrid('getPager');  
+				        pager.pagination({
+							total:data.total,
+							pageSize:data.size,
+							pageNumber:data.current,
+							pageList:[10, 20, 30, 50], 
+							buttons:[{
+								iconCls:'icon-search',
+								handler:function(){
+						        	$.messager.alert('search', '搜索引擎还在维护中');
+								}
+							},{
+								iconCls:'icon-add',
+								handler:function(){
+									saveCategoryItemPreview();
+								}
+							},{
+								iconCls:'icon-edit',
+								handler:function(){
+									editCategoryItemPreview();
+								}
+							},{
+								iconCls:'icon-remove',
+								handler:function(){
+									deleteCategoryItem();
+								}
+							}],
+							onSelectPage: function (pageNum, pageSize) {
+								queryList(pageNum, pageSize);							
+				            }  
+				        });  
+				    },
+				    error:function(data){
+			        	$.messager.alert('ERROR', '查询失败' + data);
+				    }
+				});
+			}
+			
+			function clearList() {
+				$('#categoryTypeId').combobox('clear');
+				$('#firstCategoryId').combobox('clear');
+				$('#secondCategoryId').combobox('clear');
+				$('#itemName').textbox('clear');
+			}
+			
+			function saveCategoryItemPreview() {
+				//初始化一级类目和二级类目
+				initSaveFirstCategory('dialogFirstCategoryId', 'dialogSecondCategoryId');
+				initSaveSecondCategory('dialogSecondCategoryId');
+
+				$('#dialogDivId').dialog({
+		           title: '新增分类属性',
+		           width: 400,
+		           height: 300,
+		           closed: false,
+		           cache: false,
+		           modal: true
+		        });
+			}
+
+			function saveCategoryItem() {
+				var dialogFirstCategoryId = $('#dialogFirstCategoryId').combobox('getValue');
+				var dialogSecondCategoryId = $('#dialogSecondCategoryId').combobox('getValue');
+				var dialogItemName = $('#dialogItemName').textbox('getValue');
+				if(dialogFirstCategoryId == '' || dialogSecondCategoryId == '' || dialogItemName == '') {
+					$.messager.alert('ERROR','参数不能为空');
+					return;
+				}
+				var requestParam = {
+						'categoryId':dialogSecondCategoryId,
+						'itemName':encodeURIComponent(dialogItemName)				
+					};
+					$.ajax({
+					    type:"POST",                          //请求类型
+					    url:host + "/categoryItem/save",      //URL
+					    data:JSON.stringify(requestParam),    //传递的参数
+					    dataType:"json",                      //返回的数据类型
+					    success:function(data){               //data就是返回的json类型的数据
+					        if(data.status == "SUCCESS"){
+					        	$('#dialogDivId').dialog('close');
+					        	queryList('','');
+					        }else if(data.status == "FAILED"){
+								$.messager.alert('FAILED', '新增失败');
+					        }else{
+								$.messager.alert('ERROR', '系统异常');
+					        }
+					    },
+					    error:function(data){
+							$.messager.alert('ERROR', '新增失败' + data);
+					    }
+					});				
+					$('#dialogCategoryItemForm').form('submit');
+			}
+			
+			//定义分类属性item主键id，用户编辑分类属性
+			var editItemId = '';
+			function editCategoryItemPreview() {
+				var row = $('#categoryItemList').datagrid('getSelected');
+				if(row == null || row == ''){
+					$.messager.alert('ERROR', '请选中一条分类属性');
+				} else {
+		        	//分类属性id初始化
+		        	editItemId = row.id;
+					//发起查询请求
+					$.ajax({
+					    type:"GET",                          //请求类型
+					    url:host + "/categoryItem/findItemById?id=" + row.id,  //URL
+					    dataType:"json",                      //返回的数据类型
+					    success:function(data){               //data就是返回的json类型的数据
+					        if(data == '' || data == null || data == undefined){
+					        	$.messager.alert('ERROR', '系统异常');
+					        } else {
+								//一级类目初始化
+								initEditFirstCategory('dialogEditFirstCategoryId', 'dialogEditSecondCategoryId', data);
+								//二级类目初始化
+								initEditSecondCategory('dialogEditSecondCategoryId', data);
+								//属性名称
+								$('#dialogEditItemName').textbox('setValue', data.itemName);
+								//打开dialog
+					        	$('#dialogEditDivId').dialog({
+							           title: '编辑分类属性',
+							           width: 400,
+							           height: 300,
+							           closed: false,
+							           cache: false,
+							           modal: true
+							    });
+					        }
+					    },
+					    error:function(data){
+				        	$.messager.alert('ERROR', '新增失败' + data);
+					    }
+				   });				
+				}
+			}
+			
+			function editCategoryItem() {
+				var dialogEditFirstCategoryId = $('#dialogEditFirstCategoryId').combobox('getValue');
+				var dialogEditSecondCategoryId = $('#dialogEditSecondCategoryId').combobox('getValue');
+				var dialogEditItemName = $('#dialogEditItemName').textbox('getValue');
+				if(dialogEditFirstCategoryId == '' || dialogEditSecondCategoryId == '' || dialogEditItemName == '') {
+					$.messager.alert('ERROR','参数不能为空');
+					return;
+				}
+				var requestParam = {
+						'id':editItemId,
+						'categoryId':dialogEditSecondCategoryId,
+						'itemName':encodeURIComponent(dialogEditItemName)				
+					};
+					$.ajax({
+					    type:"POST",                          //请求类型
+					    url:host + "/categoryItem/update",      //URL
+					    data:JSON.stringify(requestParam),    //传递的参数
+					    dataType:"json",                      //返回的数据类型
+					    success:function(data){               //data就是返回的json类型的数据
+					        if(data.status == "SUCCESS"){
+					        	$('#dialogEditDivId').dialog('close');
+					        	queryList('','');
+					        }else if(data.status == "FAILED"){
+					        	$.messager.alert('FAILED', '更新失败');
+					        }else{
+					        	$.messager.alert('ERROR', '系统异常');
+					        }
+					    },
+					    error:function(data){
+				        	$.messager.alert('ERROR', '更新失败' + data);
+					    }
+					});				
+					$('#dialogEditCategoryItemForm').form('submit');
+			}
+			
+			function deleteCategoryItem() {
+				var row = $('#categoryItemList').datagrid('getSelected');
+				if(row == null || row == ''){
+					$.messager.alert('ERROR', '请选中一条分类属性');
+				} else {
+					$.ajax({
+					    type:"POST",                          //请求类型
+					    url:host + "/categoryItem/delete?id=" + row.id,      //URL
+					    dataType:"json",                      //返回的数据类型
+					    success:function(data){               //data就是返回的json类型的数据
+					        if(data.status == "SUCCESS"){
+					        	$.messager.alert('SUCCESS', '删除成功');
+					        	queryList('','');
+					        }else if(data.status == "FAILED"){
+					        	$.messager.alert('FAILED', '删除失败');
+					        }else{
+					        	$.messager.alert('ERROR', '系统异常');
+					        }
+					    },
+					    error:function(data){
+				        	$.messager.alert('ERROR', '删除失败' + data);
+					    }
+					});				
+				}
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,49 @@
+server:
+   port: 8101
+   host: 127.0.0.1
+   public:
+      host: public.server.com
+
+spring:
+   application:
+      name: uid-service
+   kafka:
+      bootstrap-servers: kafka-host.com:9092   
+   cloud:
+      config:
+         discovery:
+            enabled: true
+      bus:
+         refresh:
+            enabled: true
+         enabled: true            
+
+logging:
+   level:
+      com.chihuo.uid: debug
+
+eureka:
+   client:
+      service-url:
+         defaultZone: http://eureka-server01.com:7001/eureka,http://eureka-server02.com:7002/eureka
+   instance:
+      hostname: ${spring.cloud.client.ip-address}
+      prefer-ip-address: true      #以IP地址注册到服务中心
+      instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}:${project.version}      #eureka显示的instanceId
+      #ip-address: ${server.public.host}      #公网ip，如果是服务内网调用不需要声明这个
+      #non-secure-port: ${server.port}      #公网端口，如果是服务内网调用不需要声明这个
+      lease-expiration-duration-in-seconds: 15      #服务过期时间配置,超过这个时间没有接收到心跳EurekaServer就会将这个实例剔除
+      lease-renewal-interval-in-seconds: 5      #服务刷新时间配置，每隔这个时间会主动心跳一次
+   healthcheck:
+      enabled: true # 启用健康检查,注意:需要引用spring boot actuator
+info:
+   app:
+      name: ${project.artifactId}
+      encoding: ${project.build.sourceEncoding}
+   company:
+      name: ${project.description}
+   build:
+      artifactId: ${project.artifactId}
+      version: ${project.version}
+      
+name: zhangsanxxx

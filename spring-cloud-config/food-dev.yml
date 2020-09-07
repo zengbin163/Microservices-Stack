@@ -1,0 +1,134 @@
+server:
+   port: 8301
+   host: 127.0.0.1
+   public:
+      host: public.server.com
+spring:
+   application:
+      name: food-consumer
+   kafka:
+      bootstrap-servers: kafka-host.com:9092   
+   cloud:
+      config:
+         discovery:
+            enabled: true
+      bus:
+         refresh:
+            enabled: true
+         enabled: true            
+   cache:
+      type: redis
+   redis:
+      database: 0
+      host: 47.115.34.118
+      port: 6379
+      password: famiao@2020
+      #连接超时时间（ms)
+      timeout: 1000
+      #高版本springboot中使用jedis或者lettuce
+      jedis:
+         pool:
+            #连接池最大连接数（负值表示无限制）
+            max-active: 8
+            #连接池最大阻塞等待时间（负值无限制)
+            max-wait: 5000ms
+            #最大空闲链接数
+            max-idle: 8
+            #最小空闲链接数
+            min-idle: 0
+   datasource:
+      hikari:
+         master:
+            type: com.alibaba.druid.pool.DruidDataSource     
+            jdbc-url: jdbc:mysql://47.115.34.118:3306/food?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
+            username: root
+            password: ntVklfM5@VMj2pHd
+            driver-class-name: com.mysql.cj.jdbc.Driver
+            #初始连接数
+            initialSize: 5
+            #最小空闲连接数
+            minIdle: 5
+            #最大连接数
+            maxActive: 20
+            # 配置获取连接等待超时的时间
+            maxWait : 60000
+            # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+            timeBetweenEvictionRunsMillis : 60000
+            # 配置一个连接在池中最小生存的时间，单位是毫秒
+            minEvictableIdleTimeMillis: 300000
+            validationQuery: SELECT 1 FROM DUAL
+            testWhileIdle: true
+            testOnBorrow: false
+            testOnReturn: false
+            # 打开并且指定每个连接上PSCache的大小，Oracle应当打开
+            poolPreparedStatements: true
+            maxPoolPreparedStatementPerConnectionSize: 20
+            maxOpenPreparedStatements: 50
+            # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+            filters: stat,wall
+            # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
+            connectionProperties: druid.stat.mergeSql= true;druid.stat.slowSqlMillis= 5000;druid.stat.logSlowSql= true
+         slave:
+            type: com.alibaba.druid.pool.DruidDataSource
+            jdbc-url: jdbc:mysql://47.115.34.118:3306/food?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
+            username: root
+            password: ntVklfM5@VMj2pHd
+            driver-class-name: com.mysql.cj.jdbc.Driver
+            #初始连接数
+            initialSize: 5
+            #最小空闲连接数
+            minIdle: 5
+            #最大连接数
+            maxActive: 20
+            # 配置获取连接等待超时的时间
+            maxWait : 60000
+            # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+            timeBetweenEvictionRunsMillis : 60000
+            # 配置一个连接在池中最小生存的时间，单位是毫秒
+            minEvictableIdleTimeMillis: 300000
+            validationQuery: SELECT 1 FROM DUAL
+            testWhileIdle: true
+            testOnBorrow: false
+            testOnReturn: false
+            # 打开并且指定每个连接上PSCache的大小，Oracle应当打开
+            poolPreparedStatements: true
+            maxPoolPreparedStatementPerConnectionSize: 20
+            maxOpenPreparedStatements: 50
+            # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+            filters: stat,wall
+            # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
+            connectionProperties: druid.stat.mergeSql= true;druid.stat.slowSqlMillis= 5000;druid.stat.logSlowSql= true
+logging:
+   level:
+      com.chihuo.food: debug
+# 文件上传后存放的路径   windows:file:F:/image/     linux:file:///data/image/
+file:
+  upload:
+    resource: /pic/
+    path: home/food/pic/
+#spring cloud
+eureka:
+   client:
+      service-url:
+         defaultZone: http://eureka-server01.com:7001/eureka,http://eureka-server02.com:7002/eureka
+   instance:
+      hostname: ${spring.cloud.client.ip-address}
+      prefer-ip-address: true      #以IP地址注册到服务中心
+      instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}:${project.version}      #eureka显示的instanceId
+      #ip-address: ${server.public.host}      #公网ip，如果是服务内网调用不需要声明这个
+      #non-secure-port: ${server.port}      #公网端口，如果是服务内网调用不需要声明这个
+      lease-expiration-duration-in-seconds: 15      #服务过期时间配置,超过这个时间没有接收到心跳EurekaServer就会将这个实例剔除
+      lease-renewal-interval-in-seconds: 5      #服务刷新时间配置，每隔这个时间会主动心跳一次
+      metadata-map:
+         cluster: ribbon
+   healthcheck:
+      enabled: true # 启用健康检查,注意:需要引用spring boot actuator
+info:
+   app:
+      name: ${project.artifactId}
+      encoding: ${project.build.sourceEncoding}
+   company:
+      name: ${project.description}
+   build:
+      artifactId: ${project.artifactId}
+      version: ${project.version}

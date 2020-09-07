@@ -1,0 +1,53 @@
+<html>
+	<head>
+		<title>美食详情</title> 
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
+		<link rel="stylesheet" type="text/css" href="/common/css/themes/default/easyui.css">
+		<link rel="stylesheet" type="text/css" href="/common/css/themes/icon.css">
+		<link rel="stylesheet" type="text/css" href="/common/css/food.css" />
+		<script type="text/javascript" src="/common/js/jquery.min.js"></script>
+		<script type="text/javascript" src="/common/js/jquery.easyui.min.js"></script>
+		<script type="text/javascript" src="/common/js/easyui-lang-zh_CN.js"></script>
+		<script type="text/javascript">
+			var host = 'http://127.0.0.1:8085';
+		</script>
+	</head>
+	<body>
+		<div id="foodNameDivId" style="font-size:32px;display:none;"></div>
+		<table>
+			<tr>
+				<th>
+					<img id="foodPicImgUrl" src="" alt="" style="width:600px;height:400px;display:none;">
+				</th>
+			</tr>
+			<tr>
+				<th>
+					美食主图
+				</th>
+			</tr>
+		</table>
+		<div id="foodDetailDivId" style="display:none;"></div>
+		<script>
+		    var url = window.location.href;
+		    var index = url.indexOf('foodId=');//获取foodId的位置
+		    var foodId = url.substr(index + 7, url.length);//获取foodId后面所有字符串
+		    
+		    $.ajax({
+			    type:"GET",                      //请求类型
+			    url:host + "/food/findById?id=" + foodId,      //URL
+			    dataType:"json",                  //返回的数据类型
+			    success:function(data){           //data就是返回的json类型的数据
+			    	$('#foodNameDivId').show();
+			    	$('#foodNameDivId').html(data.foodName);
+			    	$('#foodPicImgUrl').show();
+			    	$('#foodPicImgUrl').attr('src', data.foodPic);
+			    	$('#foodDetailDivId').show();
+			    	$('#foodDetailDivId').html(data.foodInfo);
+			    },
+			    error:function(data){
+			        alert("新增失败" + data);
+			    }
+			});				
+		</script>
+	</body>
+</html>

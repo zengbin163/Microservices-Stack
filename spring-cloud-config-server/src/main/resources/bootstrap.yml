@@ -1,0 +1,16 @@
+spring:
+   cloud:
+      bus:
+         refresh:
+            enabled: true
+      enabled: true
+   kafka:
+      bootstrap-servers: kafka-host.com:9092
+      consumer:
+         group-id: food
+
+management:
+   endpoints:
+      web:
+         exposure:
+            include: '*'

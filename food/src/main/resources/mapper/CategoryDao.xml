@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chihuo.food.domain.category.repository.mapper.CategoryDao">
+
+	<insert id="save" useGeneratedKeys="true" keyProperty="id" parameterType="com.chihuo.food.domain.category.repository.po.CategoryPO">
+		  insert into category (
+				category_type_id,
+				parent_id,
+				category_name,
+				create_time,
+				update_time
+		  ) values (
+		    	#{categoryPO.categoryTypeId},
+		    	#{categoryPO.parentId},
+		   		#{categoryPO.categoryName},
+	            NOW(),
+		        NOW()
+		  )
+	</insert>
+    
+	<update id="update" parameterType="com.chihuo.food.domain.category.repository.po.CategoryPO">
+        update category
+        <set>
+            update_time=NOW(),
+            <if test="categoryPO.categoryTypeId != null">category_type_id=#{categoryPO.categoryTypeId},</if>
+            <if test="categoryPO.parentId != null">parent_id=#{categoryPO.parentId},</if>
+            <if test="categoryPO.categoryName != null">category_name=#{categoryPO.categoryName},</if>
+        </set>
+        where id = #{categoryPO.id}
+	</update>
+    
+    <select id="findById" parameterType="Integer" resultType="com.chihuo.food.domain.category.repository.po.CategoryPO">
+        select id id,
+        	   category_type_id categoryTypeId,
+        	   parent_id parentId,
+        	   category_name categoryName,
+        	   create_time createTime,
+        	   update_time updateTime
+        from category
+        where id = #{id}
+    </select>
+    
+    <select id="queryCategoryListByParentId" parameterType="Integer" resultType="com.chihuo.food.domain.category.repository.po.CategoryPO">
+        select id id,
+        	   category_type_id categoryTypeId,
+        	   parent_id parentId,
+        	   category_name categoryName,
+        	   create_time createTime,
+        	   update_time updateTime
+        from category
+        where parent_id = #{parentId}
+        order by id asc
+    </select>
+	
+</mapper>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chihuo.sharding.domain.order.repository.mapper.OrderItemDao">
+
+	<insert id="save" useGeneratedKeys="false" keyProperty="uid" parameterType="com.chihuo.sharding.domain.order.repository.po.OrderItemPO">
+		  insert into f_order_item (
+				uid,
+				user_id,
+				seller_id,
+				order_id,
+				food_id,
+				food_name,
+				order_item_amount,
+				order_item_sum,
+				promotion_id,
+				promotion_amount,
+				coupon_id,
+				coupon_amount,
+				create_time
+		  ) values (
+		    	#{orderItemPO.uid},
+		    	#{orderItemPO.userId},
+		    	#{orderItemPO.sellerId},
+		    	#{orderItemPO.orderId},
+		    	#{orderItemPO.foodId},
+		    	#{orderItemPO.foodName},
+		    	#{orderItemPO.orderItemAmount},
+		    	#{orderItemPO.orderItemSum},
+		    	#{orderItemPO.promotionId},
+		    	#{orderItemPO.promotionAmount},
+		    	#{orderItemPO.couponId},
+		    	#{orderItemPO.couponAmount},
+	            NOW()
+		  )
+	</insert>
+	
+	<select id="findOrderItemList" resultType="com.chihuo.sharding.domain.order.repository.po.OrderItemPO">
+		select 	uid uid,
+				user_id userId,
+				seller_id sellerId,
+				order_id orderId,
+				food_id foodId,
+				food_name foodName,
+				order_item_amount orderItemAmount,
+				order_item_sum orderItemSum,
+				promotion_id promotionId,
+				promotion_amount promotionAmount,
+				coupon_id couponId,
+				coupon_amount couponAmount,
+				create_time createTime
+		from  f_order_item      
+	</select>
+
+	<select id="countOrderItemList" resultType="int">
+		select count(*) from f_order_item      
+	</select>
+	
+	<select id="findOrderItemListByOrderId" resultType="com.chihuo.sharding.domain.order.repository.po.OrderItemPO">
+		select 	uid uid,
+				user_id userId,
+				seller_id sellerId,
+				order_id orderId,
+				food_id foodId,
+				food_name foodName,
+				order_item_amount orderItemAmount,
+				order_item_sum orderItemSum,
+				promotion_id promotionId,
+				promotion_amount promotionAmount,
+				coupon_id couponId,
+				coupon_amount couponAmount,
+				create_time createTime
+		from  f_order_item
+		where order_id = #{orderId}  
+	</select>
+    
+	<update id="updateOrderItem" parameterType="com.chihuo.sharding.domain.order.repository.po.OrderItemPO">
+        update f_order_item
+          <set>
+              <if test="item.userId != null" >
+                  user_id = #{item.userId,jdbcType=BIGINT},
+              </if>
+              <if test="item.sellerId != null" >
+                  seller_id = #{item.sellerId,jdbcType=BIGINT},
+              </if>
+              <if test="item.orderId != null" >
+                  order_id = #{item.orderId,jdbcType=BIGINT},
+              </if>
+              <if test="item.foodId != null" >
+                  food_id = #{item.foodId,jdbcType=BIGINT},
+              </if>
+              <if test="item.foodName != null" >
+                  food_name = #{item.foodName,jdbcType=VARCHAR},
+              </if>
+              <if test="item.orderItemAmount != null" >
+                  order_item_amount = #{item.orderItemAmount,jdbcType=DECIMAL},
+              </if>
+              <if test="item.orderItemSum != null" >
+                  order_item_sum = #{item.orderItemSum,jdbcType=INTEGER},
+              </if>
+              <if test="item.promotionId != null" >
+                  promotion_id = #{item.promotionId,jdbcType=BIGINT},
+              </if>
+              <if test="item.promotionAmount != null" >
+                  promotion_amount = #{item.promotionAmount,jdbcType=DECIMAL},
+              </if>
+              <if test="item.couponId != null" >
+                  coupon_id = #{item.couponId,jdbcType=BIGINT},
+              </if>
+              <if test="item.couponAmount != null" >
+                  coupon_amount = #{item.couponAmount,jdbcType=DECIMAL},
+              </if>
+           </set>
+         where uid = #{item.uid,jdbcType=BIGINT} and user_id = #{item.userId,jdbcType=BIGINT}
+    </update>
+	
+</mapper>

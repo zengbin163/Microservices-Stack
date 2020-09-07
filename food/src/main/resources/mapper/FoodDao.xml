@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chihuo.food.domain.food.repository.mapper.FoodDao">
+
+	<resultMap id="foodResultMap" type="com.chihuo.food.domain.food.repository.po.FoodPO">
+	  <id column="food_id" jdbcType="BIGINT" property="uid" />
+	  <result column="food_name" jdbcType="VARCHAR" property="foodName" />
+	  <result column="food_pic" jdbcType="VARCHAR" property="foodPic" />
+	  <result column="food_info" jdbcType="VARCHAR" property="foodInfo" />
+	  <result column="price" jdbcType="DECIMAL" property="price" />
+	  <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+	  <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+	  
+	  <association property="category" resultMap="categoryResultMap"/>
+	  <association property="parentCategory" resultMap="parentCategoryResultMap"/>
+	</resultMap>
+
+	<resultMap id="categoryResultMap" type="com.chihuo.food.domain.category.repository.po.CategoryPO" >
+	    <id column="category_id" javaType="INTEGER" property="id" />
+		<result column="category_type_id" jdbcType="INTEGER" property="categoryTypeId" />
+		<result column="c_parent_id" jdbcType="INTEGER" property="parentId" />
+		<result column="category_name" jdbcType="VARCHAR" property="categoryName" />
+		<result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+		<result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />	    
+	</resultMap>
+	
+	<resultMap id="parentCategoryResultMap" type="com.chihuo.food.domain.category.repository.po.CategoryPO" >
+	    <id column="parent_category_id" property="id" javaType="INTEGER" />
+		<result column="category_type_id" jdbcType="INTEGER" property="categoryTypeId" />
+		<result column="p_parent_id" jdbcType="INTEGER" property="parentId" />
+		<result column="parent_category_name" jdbcType="VARCHAR" property="categoryName" />
+		<result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+		<result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />	    
+	</resultMap>
+
+	<insert id="save" parameterType="com.chihuo.food.domain.food.repository.po.FoodPO" useGeneratedKeys="false" keyProperty="uid">
+		  insert into food (
+		  		uid,
+				category_id,
+				food_name,
+				food_pic,
+				food_info,
+				price,
+				create_time,
+				update_time
+		  ) values (
+		    	#{foodPO.uid},
+		    	#{foodPO.category.id},
+		    	#{foodPO.foodName},
+		   		#{foodPO.foodPic},
+		   		#{foodPO.foodInfo},
+		   		#{foodPO.price},
+	            NOW(),
+		        NOW()
+		  )
+	</insert>
+    
+	<update id="update" parameterType="com.chihuo.food.domain.food.repository.po.FoodPO">
+        update food
+        <set>
+            update_time=NOW(),
+            <if test="foodPO.category.id != null">category_id=#{foodPO.category.id},</if>
+            <if test="foodPO.foodName != null">food_name=#{foodPO.foodName},</if>
+            <if test="foodPO.foodPic != null">food_pic=#{foodPO.foodPic},</if>
+            <if test="foodPO.foodInfo != null">food_info=#{foodPO.foodInfo},</if>
+        </set>
+        where uid = #{foodPO.uid}
+	</update>
+    
+    <select id="findById" parameterType="Long" resultMap="foodResultMap">
+        select f.uid food_id,
+        	   f.food_name food_name,
+        	   f.food_pic food_pic,
+        	   f.food_info food_info,
+        	   f.price price,
+        	   f.create_time createTime,
+        	   f.update_time updateTime,
+        	   c.id category_id,
+    	   	   c.parent_id c_parent_id,
+			   c.category_name category_name
+        from food f LEFT JOIN category c ON f.category_id = c.id
+        where f.uid = #{uid}
+    </select>
+    
+    <select id="queryFoodList" resultMap="foodResultMap">
+        select f.uid food_id,
+        	   f.food_name food_name,
+        	   f.food_pic food_pic,
+        	   f.food_info food_info,
+        	   f.price price,
+        	   f.create_time createTime,
+        	   f.update_time updateTime,
+        	   c.id category_id,
+    	   	   c.parent_id c_parent_id,
+			   c.category_name category_name,
+   			   p.id parent_category_id,
+			   p.parent_id p_parent_id,
+			   p.category_name parent_category_name
+        from food f LEFT JOIN category c ON f.category_id = c.id LEFT JOIN category p ON c.parent_id = p.id
+		<where>
+		    <if test="firstCategoryId != null">
+		         c.parent_id = #{firstCategoryId}
+		    </if>
+		    <if test="secondCategoryId != null">
+		         and c.id = #{secondCategoryId}
+		    </if>
+		    <if test="foodName != null">
+		         and f.food_name like concat('%',#{foodName},'%') 
+		    </if>
+		</where>
+        order by f.update_time DESC
+    </select>
+	
+	<select id="findFoodListRandom" resultType="com.chihuo.food.domain.food.repository.po.FoodPO">
+        select f.uid uid,
+        	   f.food_name foodName,
+        	   f.food_pic foodPic,
+        	   f.food_info foodInfo,
+        	   f.price price,
+        	   f.create_time createTime,
+        	   f.update_time updateTime
+        from food f
+		ORDER BY RAND() 
+		LIMIT #{foodCount}
+	</select>
+	
+    <select id="findFoodList" resultMap="foodResultMap">
+        select f.uid food_id,
+        	   f.food_name food_name,
+        	   f.food_pic food_pic,
+        	   f.food_info food_info,
+        	   f.price price,
+        	   f.create_time createTime,
+        	   f.update_time updateTime,
+        	   c.id category_id,
+    	   	   c.parent_id c_parent_id,
+			   c.category_name category_name,
+   			   p.id parent_category_id,
+			   p.parent_id p_parent_id,
+			   p.category_name parent_category_name
+        from food f LEFT JOIN category c ON f.category_id = c.id LEFT JOIN category p ON c.parent_id = p.id
+     </select>
+      
+    <select id="findFoodListByIds" resultType="com.chihuo.food.domain.food.repository.po.FoodPO">
+        select f.uid uid,
+        	   f.uid category.id,
+        	   f.food_name foodName,
+        	   f.food_pic foodPic,
+        	   f.food_info foodInfo,
+        	   f.price price,
+        	   f.create_time createTime,
+        	   f.update_time updateTime
+        from food f
+        where f.uid in 
+        <foreach collection="ids" item="uid" index="index" open="(" close=")" separator=",">
+        	#{uid}
+        </foreach>
+     </select>
+      
+</mapper>

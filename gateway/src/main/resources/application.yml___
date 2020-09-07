@@ -1,0 +1,75 @@
+server:
+   port: 7788
+   host: 127.0.0.1
+   public:
+      host: public.server.com
+
+spring:
+   application:
+      name: gateway-service
+   redis:
+      host: 47.115.34.118
+      port: 6379
+      password: famiao@2020
+      database: 0
+                #连接超时时间（ms)
+      timeout: 10000
+      jedis:
+         pool:
+            max-active: 8
+            max-wait: -1
+            max-idle: 8
+            min-idle: 0
+   cloud:
+      gateway:
+         discovery:
+            locator:
+               enabled: true
+         routes:
+          - id: uid-limit
+            uri: lb://uid-service
+            predicates:
+             - Method=GET
+            filters:
+             - name: RequestRateLimiter
+               args:
+                  key-resolver: "#{@sysKeyResolver}"
+                  redis-rate-limiter.replenishRate: 1
+                  redis-rate-limiter.burstCapacity: 3
+          - id: notify-limit
+            uri: lb://kafka-notify-service
+            predicates:
+             - Method=GET
+          - id: baidu
+            uri: https://www.baidu.com
+            predicates:
+             - Path=/baidu/**
+
+logging:
+   level:
+      com.chihuo.gateway: debug
+      org.springframework.cloud.gateway: trace
+eureka:
+   client:
+      serviceUrl:
+         defaultZone: http://eureka-server01.com:7001/eureka,http://eureka-server02.com:7002/eureka
+   instance:
+      hostname: ${spring.cloud.client.ip-address}
+      prefer-ip-address: true      #以IP地址注册到服务中心
+      instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}:@project.version@      #eureka显示的instanceId
+      ip-address: ${server.public.host}      #公网ip，如果是服务内网调用不需要声明这个
+      non-secure-port: ${server.port}      #公网端口，如果是服务内网调用不需要声明这个
+      lease-expiration-duration-in-seconds: 15      #服务过期时间配置,超过这个时间没有接收到心跳EurekaServer就会将这个实例剔除
+      lease-renewal-interval-in-seconds: 5      #服务刷新时间配置，每隔这个时间会主动心跳一次
+   healthcheck:
+      enabled: true # 启用健康检查,注意:需要引用spring boot actuator
+
+info:
+   app:
+      name: @project.artifactId@
+      encoding: @project.build.sourceEncoding@
+   company:
+      name: @project.description@
+   build:
+      artifactId: @project.artifactId@
+      version: @project.version@

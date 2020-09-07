@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chihuo.food.domain.user.repository.mapper.UserAccountDao">
+
+	<insert id="save" useGeneratedKeys="false" keyProperty="uid" parameterType="com.chihuo.food.domain.user.repository.po.UserAccountPO">
+		  insert into f_user_account (
+				uid,
+				user_id,
+				hongbao_total,
+				version,
+				create_time
+		  ) values (
+		    	#{userAccountPO.uid},
+		    	#{userAccountPO.userId},
+		    	#{userAccountPO.hongbaoTotal},
+		    	0,
+	            NOW()
+		  )
+	</insert>
+	
+	<update id="updateHongbao" parameterType="com.chihuo.food.domain.user.repository.po.UserAccountPO">
+		update f_user_account 
+			set hongbao_total = #{hongbaoTotal}
+		where user_id = #{userId}
+	</update>
+	
+	<select id="findUserAccountByUserId" resultType="com.chihuo.food.domain.user.repository.po.UserAccountPO">
+		select uid uid,
+		       user_id userId,
+			   hongbao_total hongbaoTotal,
+			   version version,
+			   create_time createTime
+		from f_user_account
+		where user_id = #{userId}
+	</select>
+
+	<select id="findUserAccountList" resultType="com.chihuo.food.domain.user.repository.po.UserAccountPO">
+		select uid uid,
+		       user_id userId,
+			   hongbao_total hongbaoTotal,
+			   version version,
+			   create_time createTime
+		from f_user_account
+	</select>
+	
+</mapper>

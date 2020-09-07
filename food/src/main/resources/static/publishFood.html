@@ -1,0 +1,181 @@
+<html>
+	<head>
+		<title>美食发布</title> 
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
+		<link rel="stylesheet" type="text/css" href="/common/css/themes/default/easyui.css">
+		<link rel="stylesheet" type="text/css" href="/common/css/themes/icon.css">
+		<link rel="stylesheet" type="text/css" href="/common/css/food.css" />
+		<script type="text/javascript" src="/common/js/jquery.min.js"></script>
+		<script type="text/javascript" src="/common/js/jquery.easyui.min.js"></script>
+		<script type="text/javascript" src="/common/js/easyui-lang-zh_CN.js"></script>
+		<link rel="stylesheet" type="text/css" href="/kindeditor/themes/default/default.css" />
+		<script type="text/javascript" src="/kindeditor/kindeditor-all.js"></script>
+		<script type="text/javascript" src="/kindeditor/kindeditor-all-min.js"></script>
+		<script type="text/javascript" src="/kindeditor/lang/zh-CN.js"></script>
+		<script type="text/javascript" src="/category/initCategory.js"></script>
+		<script type="text/javascript" src="/category/upload.js"></script>
+		<script type="text/javascript">
+			var host = 'http://127.0.0.1:8085';
+		</script>
+	</head>
+	<body>
+		<h2>美食发布</h2>
+		<p>请发布您所关注的美食内容</p>
+		<div style="margin:20px 0;"></div>
+		<div class="easyui-panel" title="美食内容" style="width:100%;max-width:1000px;padding:30px 60px;">
+			<form id="foodForm" method="post">
+				<div style="margin-bottom:20px">
+					<select class="easyui-combobox" id="firstCategoryId" name="firstCategoryId" style="width:200px" ></select>
+				</div>
+				<div style="margin-bottom:20px">
+					<select class="easyui-combobox" id="secondCategoryId" name="secondCategoryId" style="width:200px" ></select>
+				</div>
+				<div id="categoryItemDivId" style="margin-bottom:20px;display:none;">
+				        <div style="margin-bottom:20px">               
+				                                 美食分类属性:
+				        </div>                         
+                        <div style="margin-bottom:20px">
+                           	<div id="categoryItemCheckBoxDivId"></div>
+                        </div>
+				</div>
+				<div style="margin-bottom:20px">
+					<input class="easyui-textbox" id="foodName" name="foodName" style="width:250px" data-options="
+							label:'美食名称:',
+							required:false,
+							labelWidth:'70px'" />
+				</div>
+				<div style="margin-bottom:20px">
+					<table>
+						<tr>
+							<td>
+							   <font style="font-size:14px;text-align:left;">美食主图:</font>
+							</td>
+							<td>
+							   <input id="foodPic" name="foodPic" type="text" style="width:300px">
+							</td>
+							<td>
+							   <img id="imgUrl" src="" alt="" style="width:30px;height:30px;display:none;"> 
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div style="margin-bottom:20px">
+				          美食内容:
+					<textarea rows="3" style="width:400px;" id="foodInfo" name="foodInfo"></textarea>			
+				</div>
+			</form>
+			<div style="text-align:center;padding:5px 0">
+				<a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()" style="width:80px">提交</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()" style="width:80px">清除</a>
+			</div>
+		</div>
+		<script>
+		    //美食主图上传图片链接
+		    var foodPicPath = '';
+			//初始化一级类目和二级类目
+			initSaveFirstCategory('firstCategoryId', 'secondCategoryId');
+			initSaveSecondCategoryWithItems('secondCategoryId');
+			//初始化分类属性checkbox
+			function initCategoryItems(categoryId) {
+			  $.ajax({
+				 type:"GET",                      //请求类型
+				 url:host + "/categoryItem/findItemByCategoryId?categoryId=" + categoryId,      //URL
+				 dataType:"json",                  //返回的数据类型
+				 success:function(data){           //data就是返回的json类型的数据
+		    	   var html = '';
+				   for(i=0;i<data.length;i++) {
+				     html = html + '&nbsp;&nbsp;' + data[i].itemName + ':' + '<input type=\'checkbox\' name=\'categoryItemCheckBox\' value=\'' + data[i].id + '\' />';
+				   }
+				   $('#categoryItemCheckBoxDivId').html(html);
+				   $('#categoryItemDivId').show();
+				 },
+				 error:function(data){
+				   alert("查询失败" + data);
+				 }
+			  });				
+			}
+			//初始化文件上传
+            $('#foodPic').filebox({
+                buttonText: '选择上传的图片',
+                buttonAlign: 'left',
+                accept: 'image/jpeg,image/gif,image/png,image/bmp',
+                onChange: function() {
+                	UploadFile('foodPic');
+                }
+            })
+            //图片上传成功后就会在上传组件左侧预览显示
+            function changeFileBoxValue(value) {
+            	foodPicPath = value;
+            	$('#imgUrl').show();
+            	$("#imgUrl").attr('src', foodPicPath);
+			}
+		    //初始化富文本编辑框
+			var editor;
+			$(function() {
+			   editor = KindEditor.create('textarea[name="foodInfo"]',{
+				   resizeType : 1,
+				   width:"100%",
+				   height:"400px",
+				   uploadJson : 'file/uploadJson',
+				   afterChange:function() {
+		          	 this.sync();
+		       	   },afterBlur:function(){
+		    	     this.sync();
+		           }
+		       });
+			});
+			//提交保存
+			function submitForm(){
+				var firstCategoryId = $('#firstCategoryId').combobox('getValue');
+				var secondCategoryId = $('#secondCategoryId').combobox('getValue');
+				var foodName = $('#foodName').val();
+				var foodPic = foodPicPath;
+				var foodInfo = document.getElementById("foodInfo").value;
+				//分类属性集合(checkbox)
+				var itemArray = new Array();
+				$.each($('input[name="categoryItemCheckBox"]'),function(){
+	                if(this.checked){
+	                	itemArray.push($(this).val());
+	                }
+	            });
+				//KindEditor.html('#foodInfo' , 'xxxxxxxxxxxxxxxxxxx');
+				if(firstCategoryId == '' || secondCategoryId == '' || foodName == '' || foodPic == '' || foodInfo == '' || 0 == itemArray.length) {
+					alert('参数不能为空');
+					return;
+				}
+				
+				var requestParam = {
+					'categoryId':secondCategoryId,
+					'foodName':encodeURIComponent(foodName),
+					'foodPic':foodPic,
+					'foodInfo':encodeURIComponent(foodInfo),
+					'itemArray':itemArray
+				};
+				
+				var jsonParam = JSON.stringify(requestParam);
+				
+				$.ajax({
+				    type:"POST",                      //请求类型
+				    url:host + "/food/save",      //URL
+				    data:jsonParam,   			  //传递的参数
+				    dataType:"json",                  //返回的数据类型
+				    success:function(data){           //data就是返回的json类型的数据
+				        if(data.status == "SUCCESS"){
+				            alert("新增成功");
+				        }else if(data.status == "FAILED"){
+				           alert("新增失败");
+				        }else{
+				            alert("系统异常");
+				        }
+				    },
+				    error:function(data){
+				        alert("新增失败" + data);
+				    }
+				});				
+			}
+			function clearForm(){
+				$('#foodForm').form('clear');
+			}
+		</script>
+	</body>
+</html>

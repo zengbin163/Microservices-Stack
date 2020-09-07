@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+
+	<bean id="cachedUidGenerator" class="com.baidu.fsg.uid.impl.CachedUidGenerator">
+		<property name="workerIdAssigner" ref="disposableWorkerIdAssigner" />
+	    <!-- 以下为可选配置, 如未指定将采用默认值 -->
+	    <property name="timeBits" value="29"/>
+	    <property name="workerBits" value="21"/>
+	    <property name="seqBits" value="13"/>
+	    <property name="epochStr" value="2020-07-16"/>
+	 
+	    <!-- RingBuffer size扩容参数, 可提高UID生成的吞吐量. -->
+	    <!-- 默认:3， 原bufferSize=8192, 扩容后bufferSize= 8192 << 3 = 65536 -->
+	    <property name="boostPower" value="3" />
+	 
+	    <!-- 另外一种RingBuffer填充时机, 在Schedule线程中, 周期性检查填充 -->
+	    <!-- 默认:不配置此项, 即不实用Schedule线程. 如需使用, 请指定Schedule线程时间间隔, 单位:秒 -->
+	    <property name="scheduleInterval" value="60" />
+	</bean>
+
+</beans>

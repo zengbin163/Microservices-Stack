@@ -1,0 +1,48 @@
+server:
+   port: 7006
+   host: 127.0.0.1
+   public:
+      host: public.server.com
+
+spring:
+   application:
+      name: hystrix-turbine
+
+logging:
+   level:
+      com.chihuo.turbine: debug
+
+eureka:
+   client:
+      serviceUrl:
+         defaultZone: http://eureka-server01.com:7001/eureka,http://eureka-server02.com:7002/eureka   #集群配置,如果有多个,用逗号分割,不要包含自己
+      register-with-eureka: true
+      fetch-registry: true   
+   instance:
+      hostname: ${spring.cloud.client.ip-address}
+      prefer-ip-address: true      #以IP地址注册到服务中心
+      instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}:@project.version@      #eureka显示的instanceId
+      ip-address: ${server.public.host}      #公网ip，如果是服务内网调用不需要声明这个
+      non-secure-port: ${server.port}      #公网端口，如果是服务内网调用不需要声明这个
+      lease-expiration-duration-in-seconds: 15      #服务过期时间配置,超过这个时间没有接收到心跳EurekaServer就会将这个实例剔除
+      lease-renewal-interval-in-seconds: 5      #服务刷新时间配置，每隔这个时间会主动心跳一次
+   healthcheck:
+      enabled: true # 启用健康检查,注意:需要引用spring boot actuator
+
+turbine:
+   combine-host-port: true
+   app-config: uid-consumer1,uid-consumer2,uid-consumer3,uid-consumer4,uid-consumer5
+   cluster-name-expression: metadata['cluster']
+   aggregator:
+      cluster-config: ribbon
+   instanceUrlSuffix: /hystrix.stream
+
+info:
+   app:
+      name: @project.artifactId@
+      encoding: @project.build.sourceEncoding@
+   company:
+      name: @project.description@
+   build:
+      artifactId: @project.artifactId@
+      version: @project.version@

@@ -1,0 +1,28 @@
+spring:
+   cloud:
+      config:
+                           #配置文件的名字
+         name: order
+                           #配置文件后缀，主要是用来区分环境版本
+         profile: dev
+                           #分支
+         label: master
+         #spring cloud config server的地址 可以配置多个
+         #uri: ["http://config.server.com:7007", "http://config.server.com:7008"]
+         uri: ["http://config.server.com:7008"]
+         enabled: true
+
+management:
+   endpoints:
+      web:
+         exposure:
+            include: '*'
+   security:
+      enabled: false
+
+project:
+   artifactId: $project.artifactId$
+   build:
+      sourceEncoding: $project.build.sourceEncoding$
+   description: $project.description$
+   version: $project.version$

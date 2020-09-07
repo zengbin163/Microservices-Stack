@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chihuo.food.domain.seller.repository.mapper.SellerFoodDao">
+
+	<insert id="save" useGeneratedKeys="false" keyProperty="uid" parameterType="com.chihuo.food.domain.seller.repository.po.SellerFoodPO">
+		  insert into f_seller_food (
+				uid,
+				seller_id,
+				food_id,
+				create_time
+		  ) values (
+		    	#{sellerFoodPO.uid},
+		    	#{sellerFoodPO.sellerId},
+		    	#{sellerFoodPO.foodId},
+	            NOW()
+		  )
+	</insert>
+	
+	<select id="findSellerIdByFoodId" resultType="com.chihuo.food.domain.seller.repository.po.SellerFoodPO">
+		select 	uid,
+				seller_id,
+				food_id,
+				create_time
+		from f_seller_food
+		where food_id = #{foodId}
+		limit 1
+	</select>
+	
+	<select id="findSellerFoodListRandom" resultType="com.chihuo.food.domain.food.repository.po.FoodPO">
+		SELECT
+			f.uid uid,
+			f.food_name foodName,
+			f.food_pic foodPic,
+			f.food_info foodInfo,
+			f.price price,
+			f.create_time createTime,
+			f.update_time updateTime 
+		FROM
+			food f 
+		WHERE
+			NOT EXISTS ( SELECT s.food_id FROM f_seller_food s WHERE s.food_id = f.uid ) 
+			LIMIT 10
+	</select>
+
+	<select id="findSellerFoodList" resultType="com.chihuo.food.domain.seller.repository.po.SellerFoodPO">
+		select 	uid uid,
+				seller_id sellerId,
+				food_id foodId,
+				create_time createTime
+		from f_seller_food
+	</select>
+
+	<select id="findSellerFoodById" resultType="com.chihuo.food.domain.seller.repository.po.SellerFoodPO">
+		select 	uid uid,
+				seller_id sellerId,
+				food_id foodId,
+				create_time createTime
+		from f_seller_food
+		where uid = #{uid}
+	</select>
+	
+</mapper>

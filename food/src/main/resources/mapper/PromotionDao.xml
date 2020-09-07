@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chihuo.food.domain.food.repository.mapper.PromotionDao">
+
+	<insert id="save" useGeneratedKeys="false" keyProperty="uid" parameterType="com.chihuo.food.domain.food.repository.po.PromotionPO">
+		  insert into f_promotion (
+				uid,
+				category_id,
+				promotion_rule,
+				total_amount,
+				deduct_amount,
+				create_time
+		  ) values (
+		    	#{promotionPO.uid},
+		    	#{promotionPO.categoryId},
+		    	#{promotionPO.promotionRule},
+		    	#{promotionPO.totalAmount},
+		    	#{promotionPO.deductAmount},
+	            NOW()
+		  )
+	</insert>
+	
+	<select id="findPromotionByRule" resultType="com.chihuo.food.domain.food.repository.po.PromotionPO">
+		select	t1.uid uid,
+				t1.category_id categoryId,
+				t1.promotion_rule promotionRule,
+				t1.total_amount totalAmount,
+				t1.deduct_amount deductAmount,
+				t1.create_time createTime
+		from f_promotion t1	join food t2 on t1.category_id = t2.category_id
+		where t2.uid = #{foodId} and <![CDATA[ t1.total_amount <= #{orderItemAmount} ]]>
+		order by t1.deduct_amount desc
+		limit 1
+	</select>
+	
+	<select id="findPromotionListByFoodId" resultType="com.chihuo.food.domain.food.repository.po.PromotionPO">
+		select	t1.uid uid,
+				t1.category_id categoryId,
+				t1.promotion_rule promotionRule,
+				t1.total_amount totalAmount,
+				t1.deduct_amount deductAmount,
+				t1.create_time createTime
+		from f_promotion t1	join food t2 on t1.category_id = t2.category_id
+		where t2.uid = #{foodId}
+		order by t1.total_amount desc,t1.deduct_amount desc
+	</select>
+	
+</mapper>

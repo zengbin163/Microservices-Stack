@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dynamicSql>
+	<nodeMapping>
+		<id>1</id>
+		<field><!-- 时间戳，大于这个时间戳的数据才能被构建成索引，这里先暂时写死一个时间，合理的做法应该单独抽到服务器作为一个文件 -->
+			2019-05-01
+		</field>
+		<index>famiao_lawer</index>
+		<mapping>
+		  {
+		    "properties": {
+		      "rowno": {
+		        "type": "long"
+		      },
+		      "mobile": {
+		        "type": "keyword"
+		      },
+		      "realName": {
+		        "type": "text",
+		        "analyzer": "ikAnalyzer",
+				"search_analyzer": "ikSearchAnalyzer"
+		      },
+		      "userName": {
+		        "type": "keyword"
+		      },
+		      "province": {
+		        "type": "keyword"
+		      },
+		      "city": {
+		        "type": "keyword"
+		      },
+		      "area": {
+		        "type": "keyword"
+		      },
+		      "sex": {
+		        "type": "keyword"
+		      },
+		      "lawOfficeName": {
+		        "type": "text",
+		        "analyzer": "ikAnalyzer",
+				"search_analyzer": "ikSearchAnalyzer"
+		      },
+		      "lawOfficeAddr": {
+		        "type": "text",
+		        "analyzer": "ikAnalyzer",
+				"search_analyzer": "ikSearchAnalyzer"
+		      },
+		      "lawerSelfEvaluation": {
+		        "type": "text",
+		        "analyzer": "ikAnalyzer",
+				"search_analyzer": "ikSearchAnalyzer"
+		      },
+		      "operationTime": {
+		        "type": "date",
+				"format": "yyyy-MM-dd HH:mm:ss || yyyy-MM-dd || epoch_millis"
+		      },
+		      "qualificationNumber": {
+		        "type": "keyword"
+		      }
+		    }
+		  }
+		</mapping>
+		<sql><!-- 需要构建索引的sql语句 %s字符串类型，%d整数类型 -->
+			SELECT
+			    (@a :=@a + 1) AS rowno,
+				t1.mobile mobile,
+				t1.real_name realName,
+				t1.user_name userName,
+				p.area_name province,
+				c.area_name city,
+				a.area_name area,
+				t2.sex sex,
+				t4.law_office_name lawOfficeName,
+				t4.law_office_addr lawOfficeAddr,
+				t4.lawer_self_evaluation lawerSelfEvaluation,
+				DATE_FORMAT(t4.operation_time,"%Y-%m-%d") operationTime,
+				t4.qualification_number qualificationNumber 
+			FROM
+			    (SELECT @a := 0) t1,
+				USER t1
+				LEFT JOIN user_cache t2 ON t1.uuid = t2.user_id
+				LEFT JOIN sys_area p ON t2.province = p.area_code
+				LEFT JOIN sys_area c ON t2.city = c.area_code
+				LEFT JOIN sys_area a ON t2.area = a.area_code
+				LEFT JOIN user_base_info t3 ON t2.user_id = t3.user_id
+				LEFT JOIN lawer_info t4 ON t3.user_id = t4.user_id
+		 </sql>
+	</nodeMapping>
+	<nodeMapping>
+		<id>2</id>
+		<field><!-- 时间戳，大于这个时间戳的数据才能被构建成索引，这里先暂时写死一个时间，合理的做法应该单独抽到服务器作为一个文件 -->
+			2019-05-01
+		</field>
+		<index>famiao_asset</index>
+		<mapping>
+		  {
+		    "properties": {
+		      "rowno": {
+		        "type": "long"
+		      },
+		      "assetRealName": {
+		        "type": "text",
+		        "analyzer": "ikAnalyzer",
+				"search_analyzer": "ikSearchAnalyzer"
+		      },
+		      "assetNo": {
+		        "type": "keyword"
+		      },
+		      "assetName": {
+		        "type": "text",
+		        "analyzer": "ikAnalyzer",
+				"search_analyzer": "ikSearchAnalyzer"
+		      },
+		      "assetEvaluateAmount": {
+		        "type": "double"
+		      },
+		      "assetMarketAmount": {
+		        "type": "double"
+		      },
+		      "serviceAmount": {
+		        "type": "double"
+		      },
+		      "assetDesc": {
+		        "type": "text",
+		        "analyzer": "ikAnalyzer",
+				"search_analyzer": "ikSearchAnalyzer"
+		      },
+		      "showTime": {
+		        "type": "date",
+				"format": "yyyy-MM-dd HH:mm:ss || yyyy-MM-dd || epoch_millis"
+		      }
+		    }
+		  }
+		</mapping>
+		<sql><!-- 需要构建索引的sql语句 %s字符串类型，%d整数类型 -->
+			SELECT
+			    (@a :=@a + 1) AS rowno,
+				t2.real_name assetRealName,
+				t1.asset_no assetNo,
+				t1.asset_name assetName,
+				t1.asset_evaluate_amount assetEvaluateAmount,
+				t1.asset_market_amount assetMarketAmount,
+				t1.service_amount serviceAmount,
+				t1.asset_desc assetDesc,
+				DATE_FORMAT(t1.show_time,"%Y-%m-%d") showTime
+			FROM
+			    (SELECT @a := 0) t1,
+				asset_info t1
+				LEFT JOIN USER t2 ON t1.user_id = t2.uuid
+		 </sql>
+	</nodeMapping>
+	<nodeMapping>
+		<id>3</id>
+		<field><!-- 时间戳，大于这个时间戳的数据才能被构建成索引，这里先暂时写死一个时间，合理的做法应该单独抽到服务器作为一个文件 -->
+			2019-05-01
+		</field>
+		<index>famiao_office</index>
+		<mapping>
+		   {
+		    "properties": {
+		      "rowno": {
+		        "type": "long"
+		      },
+		      "officeName": {
+		        "type": "text",
+		        "analyzer": "ikAnalyzer",
+				"search_analyzer": "ikSearchAnalyzer"
+		      },
+		      "officeCode": {
+		        "type": "keyword"
+		      },
+		      "creditCode": {
+		        "type": "keyword"
+		      },
+		      "legalDelegate": {
+		        "type": "text",
+		        "analyzer": "ikAnalyzer",
+				"search_analyzer": "ikSearchAnalyzer"
+		      },
+		      "establishDate": {
+		        "type": "date",
+				"format": "yyyy-MM-dd HH:mm:ss || yyyy-MM-dd || epoch_millis"
+		      },
+		      "contactAddr": {
+		        "type": "text",
+		        "analyzer": "ikAnalyzer",
+				"search_analyzer": "ikSearchAnalyzer"
+		      },
+		      "contactTel": {
+		        "type": "keyword"
+		      },
+		      "orgType": {
+		        "type": "keyword"
+		      }
+		    }
+		  }
+		</mapping>
+		<sql><!-- 需要构建索引的sql语句 %s字符串类型，%d整数类型 -->
+			SELECT
+				( @a := @a + 1 ) AS rowno,
+				t1.office_name officeName,
+				t1.office_code officeCode,
+				t1.credit_code creditCode,
+				t1.legal_delegate legalDelegate,
+				DATE_FORMAT(t1.establish_date,"%Y-%m-%d") establishDate,
+				t1.contact_addr contactAddr,
+				t1.contact_tel contactTel,
+				t1.org_type orgType 
+			FROM
+				( SELECT @a := 0 ) t1,
+				crawler_law_office_info t1
+		</sql>
+	</nodeMapping>
+</dynamicSql>

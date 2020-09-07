@@ -1,0 +1,94 @@
+<html>
+	<head>
+		<title>创建分类</title> 
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
+		<link rel="stylesheet" type="text/css" href="/common/css/themes/default/easyui.css">
+		<link rel="stylesheet" type="text/css" href="/common/css/themes/icon.css">
+		<link rel="stylesheet" type="text/css" href="/common/css/food.css" />
+		<script type="text/javascript" src="/common/js/jquery.min.js"></script>
+		<script type="text/javascript" src="/common/js/jquery.easyui.min.js"></script>
+		<script type="text/javascript" src="/common/js/easyui-lang-zh_CN.js"></script>
+		<script type="text/javascript">
+			var host = 'http://127.0.0.1:8085';
+		</script>
+	</head>
+	<body>
+		<h2>创建分类</h2>
+		<p>请输出您需要创建的分类信息</p>
+		<div style="margin:20px 0;"></div>
+		<div class="easyui-panel" title="分类内容" style="width:100%;max-width:400px;padding:30px 60px;">
+			<form id="categoryForm" method="post">
+				<div style="margin-bottom:20px">
+					<input class="easyui-combobox" id="categoryTypeId" name="categoryTypeId" style="width:100%;" data-options="
+							url:host + '/categoryType/findList',
+							method:'get',
+							valueField:'id',
+							textField:'typeName',
+							panelHeight:'auto',
+							label: '美食大类:',
+							labelPosition: 'left',
+							required:true
+							">
+				</div>
+				<div style="margin-bottom:20px">
+					<input class="easyui-combobox" id="parentId" name="parentId" style="width:100%;" data-options="
+							url:host + '/category/findByPid?parentId=0',
+							method:'get',
+							valueField:'id',
+							textField:'categoryName',
+							panelHeight:'auto',
+							label: '上级分类:',
+							labelPosition: 'left',
+							required:true
+							">
+				</div>
+				<div style="margin-bottom:20px">
+					<input class="easyui-textbox" id="categoryName" name="categoryName" style="width:100%" data-options="label:'分类名称:',required:true">
+				</div>
+			</form>
+			<div style="text-align:center;padding:5px 0">
+				<a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()" style="width:80px">提交</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()" style="width:80px">清除</a>
+			</div>
+		</div>
+		<script>
+			function submitForm(){
+				var categoryTypeId = $('#categoryTypeId').combobox('getValue');
+				var parentId = $('#parentId').combobox('getValue');
+				var categoryName = $('#categoryName').val();
+				if(categoryTypeId == '' || parentId == '' || categoryName == '') {
+					alert('参数不能为空');
+					return;
+				}
+				var requestParam = {
+					'categoryTypeId':categoryTypeId,
+					'parentId':parentId,
+					'categoryName':encodeURIComponent(categoryName)				
+				};
+				
+				$.ajax({
+				    type:"POST",                      //请求类型
+				    url:host + "/category/save",      //URL
+				    data:JSON.stringify(requestParam),   			  //传递的参数
+				    dataType:"json",                  //返回的数据类型
+				    success:function(data){           //data就是返回的json类型的数据
+				        if(data.status == "SUCCESS"){
+				            alert("新增成功");
+				        }else if(data.status == "FAILED"){
+				           alert("新增失败");
+				        }else{
+				            alert("系统异常");
+				        }
+				    },
+				    error:function(data){
+				        alert("新增失败" + data);
+				    }
+				});				
+				$('#categoryForm').form('submit');
+			}
+			function clearForm(){
+				$('#categoryForm').form('clear');
+			}
+		</script>
+	</body>
+</html>

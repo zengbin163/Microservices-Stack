@@ -1,0 +1,84 @@
+#创建集合索引别名
+POST /_aliases
+{
+   "actions" : [
+       { "add" : { "index" : "famiao*", "alias" : "searchfamiao" } }
+   ]
+}
+
+#各个分片、索引的fielddata在内存中的占用情况
+GET /_stats/fielddata?fields=* 
+#每个node的fielddata在内存中的占用情况
+GET /_nodes/stats/indices/fielddata?fields=*
+#每个node中的每个索引的fielddata在内存中的占用情况
+GET /_nodes/stats/indices/fielddata?level=indices&fields=*
+
+#当ES进行排序sort、统计aggs时，ES把涉及到的字段数据全部读取到内存JVM Heap中进行操作，默认情况fielddata是关闭的
+PUT famiao_lawer/_mapping/
+{
+    "properties":{
+        "mobile":{
+            "type":"text",
+            "fielddata":true
+        }
+    }
+}
+
+#排序
+GET /searchfamiao/_search
+{
+  "query": {
+    "match_all": {}
+  },
+  "sort": [
+    {
+      "operationTime": {
+        "order": "desc",
+        "missing" : "_last"
+      }
+    },
+    {
+      "mobile": {
+        "order": "asc",
+        "missing" : "_last"
+      }    
+    },
+    "_score"
+  ]
+}
+
+#集群搭建 famiao-cluster
+47.115.34.118 172.18.106.125 famiao-node-1
+8.129.173.185 172.18.106.126 famiao-node-2
+8.129.172.251 172.18.106.124 famiao-node-3
+
+http://47.115.34.118:9200/_cat/nodes
+http://47.115.34.118:9200/_xpack
+
+##################################集群搭建elasticsearch.yml##################################
+cluster.name: famiao-cluster
+node.name: famiao-node-3
+node.master: true
+node.data: true
+path.data: /usr/local/elasticsearch-7.1.1/data
+path.logs: /usr/local/elasticsearch-7.1.1/logs
+bootstrap.memory_lock: false
+bootstrap.system_call_filter: false
+network.host: 172.18.106.124
+#network.publish_host
+# es对外提供的http端口，默认 9200
+http.port: 9200
+# TCP的默认监听端口，默认 9300
+transport.tcp.port: 9300
+# 设置这个参数来保证集群中的节点可以知道其它N个有master资格的节点。默认为1，对于大的集群来说，可以设置大一点的值（2-4）
+discovery.zen.minimum_master_nodes: 2
+# es7.x 之后新增的配置，写入候选主节点的设备地址，在开启服务后可以被选为主节点
+discovery.zen.ping.unicast.hosts: ["172.18.106.125:9300", "172.18.106.126:9300", "172.18.106.124:9300"]
+discovery.zen.fd.ping_timeout: 1m
+discovery.zen.fd.ping_retries: 5
+# es7.x 之后新增的配置，初始化一个新的集群时需要此配置来选举master
+cluster.initial_master_nodes: ["famiao-node-1", "famiao-node-2", "famiao-node-3"]
+#添加如下配置，支持跨域访问
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+##################################集群搭建elasticsearch.yml##################################

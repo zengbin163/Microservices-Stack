@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chihuo.food.domain.category.repository.mapper.CategoryItemDao">
+
+	<resultMap id="categoryItemResultMap" type="com.chihuo.food.domain.category.repository.po.CategoryItemPO">
+	  <id column="item_id" jdbcType="INTEGER" property="id" />
+	  <result column="i_category_id" jdbcType="INTEGER" property="categoryId" />
+	  <result column="item_name" jdbcType="VARCHAR" property="itemName" />
+	  <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+	  <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+	  
+	  <association property="categoryPO" resultMap="categoryResultMap"/>
+	  <association property="parentCategoryPO" resultMap="parentCategoryResultMap"/>
+	  <association property="categoryTypePO" resultMap="categoryTypeResultMap"/>
+	</resultMap>
+	
+	<resultMap id="categoryResultMap" type="com.chihuo.food.domain.category.repository.po.CategoryPO" >
+	    <id column="category_id" javaType="INTEGER" property="id" />
+		<result column="category_type_id" jdbcType="INTEGER" property="categoryTypeId" />
+		<result column="c_parent_id" jdbcType="INTEGER" property="parentId" />
+		<result column="category_name" jdbcType="VARCHAR" property="categoryName" />
+		<result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+		<result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />	    
+	</resultMap>
+	
+	<resultMap id="parentCategoryResultMap" type="com.chihuo.food.domain.category.repository.po.CategoryPO" >
+	    <id column="parent_category_id" property="id" javaType="INTEGER" />
+		<result column="category_type_id" jdbcType="INTEGER" property="categoryTypeId" />
+		<result column="p_parent_id" jdbcType="INTEGER" property="parentId" />
+		<result column="parent_category_name" jdbcType="VARCHAR" property="categoryName" />
+		<result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+		<result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />	    
+	</resultMap>
+	
+	<resultMap id="categoryTypeResultMap" type="com.chihuo.food.domain.category.repository.po.CategoryTypePO" >
+	    <id column="category_type_id" property="id" javaType="INTEGER" />
+		<result column="type_name" jdbcType="VARCHAR" property="typeName" />
+		<result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+		<result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />	    
+	</resultMap>
+   	
+  
+	<insert id="save" useGeneratedKeys="true" keyProperty="id" parameterType="com.chihuo.food.domain.category.repository.po.CategoryItemPO">
+		  insert into category_item (
+				category_id,
+				item_name,
+				create_time,
+				update_time
+		  ) values (
+		    	#{categoryItemPO.categoryId},
+		    	#{categoryItemPO.itemName},
+	            NOW(),
+		        NOW()
+		  )
+	</insert>
+    
+	<update id="update" parameterType="com.chihuo.food.domain.category.repository.po.CategoryItemPO">
+        update category_item
+        <set>
+            update_time=NOW(),
+            <if test="categoryItemPO.categoryId != null">category_id=#{categoryItemPO.categoryId},</if>
+            <if test="categoryItemPO.itemName != null">item_name=#{categoryItemPO.itemName},</if>
+        </set>
+        where id = #{categoryItemPO.id}
+	</update>
+	
+	<delete id="delete">
+		delete from category_item where id = #{id}
+	</delete>
+    
+    <select id="findById" parameterType="Integer" resultMap="categoryItemResultMap">
+        select ci.id item_id,
+			   ci.category_id i_category_id,
+			   ci.item_name item_name,
+        	   ci.create_time createTime,
+        	   ci.update_time updateTime,
+			   c.id category_id,
+			   c.parent_id c_parent_id,
+			   c.category_name category_name
+        from category_item ci JOIN category c ON ci.category_id = c.id
+        where ci.id = #{id}
+    </select>
+    
+    <select id="queryCategoryItemListByCategoryId" parameterType="Integer" resultType="com.chihuo.food.domain.category.repository.po.CategoryItemPO">
+        select id id,
+        	   category_id categoryId,
+        	   item_name itemName,
+        	   create_time createTime,
+        	   update_time updateTime
+        from category_item
+        where category_id = #{categoryId}
+        order by update_time DESC
+    </select>
+	
+	<select id="queryCategoryItemList" resultMap="categoryItemResultMap">
+		SELECT
+			ct.id category_type_id,
+			ct.type_name type_name,
+			p.id parent_category_id,
+			p.parent_id p_parent_id,
+			p.category_name parent_category_name,
+			c.id category_id,
+			c.parent_id c_parent_id,
+			c.category_name category_name,
+			ci.id item_id,
+			ci.category_id i_category_id,
+			ci.item_name item_name 
+		FROM
+			category_type ct
+			JOIN category p ON ct.id = p.category_type_id
+			JOIN category c ON c.parent_id = p.id
+			JOIN category_item ci ON c.id = ci.category_id
+		<where>
+		    <if test="typeId != null">
+		         ct.id = #{typeId}
+		    </if>
+		    <if test="firstCategoryId != null">
+		         and p.id = #{firstCategoryId}
+		    </if>
+		    <if test="secondCategoryId != null">
+		         and c.id = #{secondCategoryId}
+		    </if>
+		    <if test="itemName != null">
+		         and ci.item_name like concat('%',#{itemName},'%') 
+		    </if>
+		</where>
+		order by ci.update_time desc
+	</select>
+</mapper>
