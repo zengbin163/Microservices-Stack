@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@TableName(value = "t_user")
+@TableName(value = "f_order_item")
 public class OrderItemPO {
 	@TableId(value = "uid")
     private Long uid;
@@ -31,5 +31,4 @@ public class OrderItemPO {
     private Long couponId;
     private BigDecimal couponAmount;
     private Date createTime;
-    
 }

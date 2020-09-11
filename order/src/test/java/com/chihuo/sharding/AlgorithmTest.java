@@ -11,7 +11,7 @@ import com.chihuo.sharding.infrastructure.algorithm.OrderTablePreciseShardingAlg
 public class AlgorithmTest {
 
 	public static void main(String[] args) {
-		printPrecise(22049400028334800L);
+		printPrecise(3867543L);
 	}
 	
 	@SuppressWarnings({"unchecked", "rawtypes"})

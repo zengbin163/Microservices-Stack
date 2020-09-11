@@ -188,12 +188,23 @@
             <groupId>com.codingapi.txlcn</groupId>
             <artifactId>txlcn-tc</artifactId>
             <version>5.0.2.RELEASE</version>
+            <exclusions>
+            	<exclusion>
+            		<groupId>com.github.jsqlparser</groupId>
+            		<artifactId>jsqlparser</artifactId>
+            	</exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.codingapi.txlcn</groupId>
             <artifactId>txlcn-txmsg-netty</artifactId>
             <version>5.0.2.RELEASE</version>
         </dependency>
+		<dependency>
+		    <groupId>com.github.jsqlparser</groupId>
+		    <artifactId>jsqlparser</artifactId>
+		    <version>3.2</version>
+		</dependency>
 	</dependencies>
 
 	<build>

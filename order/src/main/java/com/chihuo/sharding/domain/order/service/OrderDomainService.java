@@ -7,6 +7,7 @@ import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.chihuo.sharding.domain.order.entity.Order;
@@ -16,6 +17,8 @@ import com.chihuo.sharding.domain.order.repository.facade.OrderRepository;
 import com.chihuo.sharding.domain.order.repository.po.OrderItemPO;
 import com.chihuo.sharding.domain.order.repository.po.OrderPO;
 import com.chihuo.sharding.infrastructure.consumer.UidClientComponent;
+import com.codingapi.txlcn.tc.annotation.DTXPropagation;
+import com.codingapi.txlcn.tc.annotation.TxcTransaction;
 import com.github.pagehelper.PageHelper;
 
 @Service
@@ -30,6 +33,8 @@ public class OrderDomainService {
     @Autowired
     private OrderFactory factory;
 
+	@TxcTransaction(propagation = DTXPropagation.SUPPORTS)
+	@Transactional(rollbackFor = Exception.class)
     public Long saveOrder(Order order) {
     	Long orderId = order.getUid();
     	if(null == orderId) {
@@ -37,9 +42,12 @@ public class OrderDomainService {
     		order.setUid(orderId);
     	}
     	this.orderRepository.save(this.factory.createOrderPO(order));
+    	int i = 100/0;
     	return orderId;
     }
 
+	@TxcTransaction(propagation = DTXPropagation.SUPPORTS)
+	@Transactional(rollbackFor = Exception.class)
 	public Long saveOrderItem(OrderItem orderItem) {
     	Long orderItemId = orderItem.getUid();
     	if(null == orderItemId) {
