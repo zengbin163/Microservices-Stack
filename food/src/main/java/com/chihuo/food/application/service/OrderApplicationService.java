@@ -15,6 +15,14 @@ public class OrderApplicationService {
 	@Autowired
 	private OrderDomainService orderDomainService;
 	
+	public Long saveOrder(Order order) {
+		return this.orderDomainService.saveOrder(order);
+	}
+
+	public Long saveOrderItem(OrderItem orderItem) {
+		return this.orderDomainService.saveOrderItem(orderItem);
+	}
+	
 	public List<Order> findOrderList(Integer current, Integer size) {
 		return this.orderDomainService.findOrderList(current, size);
 	}
@@ -35,8 +43,12 @@ public class OrderApplicationService {
 		return this.orderDomainService.findUserOrderList(current, size, userId);
 	}
 	
-	public void refreshOrder() {
-		this.orderDomainService.refreshOrder();
+	public List<Order> findSellerOrderList(Integer current, Integer size, Long sellerId) {
+		return this.orderDomainService.findSellerOrderList(current, size, sellerId);
+	}
+	
+	public Order findOrderById(Long uid) {
+		return this.orderDomainService.findOrderById(uid);
 	}
 	
 }

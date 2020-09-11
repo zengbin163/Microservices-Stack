@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.chihuo.api.component.topic.Topic;
 import com.chihuo.food.infrastructure.common.session.value.NoLogin;
 import com.chihuo.food.infrastructure.consumer.MessageProducerComponent;
 
@@ -19,9 +20,9 @@ public class MessageProducerController {
 
 	@RequestMapping(value = "/send", method = RequestMethod.GET)
 	@NoLogin
-	public String send(@RequestParam(value = "key") String key, @RequestParam(value = "value") String value) {
+	public String send(@RequestParam(value = "key") String key, @RequestParam(value = "value") String value) throws Exception {
 	    //调用远程服务 http请求
-		return this.producer.send(key, value);
+		return this.producer.send(Topic.TOPIC_COUPON_SERVICE, key, value);
 	}
 
 }

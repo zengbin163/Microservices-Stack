@@ -17,9 +17,9 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.chihuo.api.component.event.DomainEvent;
 import com.chihuo.food.infrastructure.common.api.Response;
 import com.chihuo.food.infrastructure.common.api.ResponseStatus;
-import com.chihuo.food.infrastructure.common.event.DomainEvent;
 import com.chihuo.food.infrastructure.common.event.EventPublisher;
 import com.chihuo.food.infrastructure.common.exception.BusinessException;
 import com.chihuo.food.infrastructure.common.exception.SystemException;

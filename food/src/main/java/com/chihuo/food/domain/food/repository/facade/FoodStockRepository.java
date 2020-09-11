@@ -1,6 +1,7 @@
 package com.chihuo.food.domain.food.repository.facade;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.chihuo.food.domain.food.repository.po.FoodStockPO;
 
@@ -8,11 +9,11 @@ public interface FoodStockRepository {
 
 	void save(FoodStockPO foodStockPO);
 
-	void updateFoodStock(Long foodId, Integer stockNum, Integer version);
+	void updateFoodStock(Long foodId, Long sellerId, Integer stockNum);
 
 	void updateSellerId(Long foodId, Long sellerId);
 	
-	FoodStockPO findFoodStockByFoodId(Long foodId);
+	Optional<FoodStockPO> findFoodStockByFoodSellerId(Long foodId, Long sellerId);
 
 	List<FoodStockPO> findFoodStockList();
 	

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.chihuo.food.domain.food.entity.Food;
+import com.chihuo.food.domain.food.entity.FoodStock;
 import com.chihuo.food.domain.food.service.FoodDomainService;
 
 @Service
@@ -27,5 +28,13 @@ public class FoodApplicationService {
 
 	public IPage<Food> queryFoodList(Integer current, Integer size, Integer firstCategoryId, Integer secondCategoryId, String foodName) {
 		return this.foodDomainService.queryFoodList(current, size, firstCategoryId, secondCategoryId, foodName);
+	}
+	
+	public FoodStock findFoodStockByFoodSellerId(Long foodId, Long sellerId) {
+		return this.foodDomainService.findFoodStockByFoodSellerId(foodId, sellerId);
+	}
+	
+	public boolean updateFoodStock(Long foodId, Long sellerId, Integer stockNum) {
+		return this.foodDomainService.updateFoodStock(foodId, sellerId, stockNum);
 	}
 }

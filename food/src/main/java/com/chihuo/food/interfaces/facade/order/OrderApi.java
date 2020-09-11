@@ -46,12 +46,5 @@ public class OrderApi {
     public Response findUserOrderList(@RequestParam(value = "current") Integer current, @RequestParam(value = "size") Integer size, @RequestParam(value = "userId") Long userId) {
     	return Response.ok(this.orderApplicationService.findUserOrderList(current, size, userId));
     }
-
-    @RequestMapping(value = "/refreshOrder", method = RequestMethod.POST)
-    @ResponseBody
-    public Response refreshOrder() {
-    	this.orderApplicationService.refreshOrder();
-    	return Response.ok();
-    }
     
 }

@@ -7,7 +7,7 @@ spring:
    kafka:
       bootstrap-servers: kafka-host.com:9092
       consumer:
-         group-id: food
+         group-id: config-group
 
 management:
    endpoints:

@@ -36,7 +36,10 @@ import com.chihuo.food.domain.food.repository.po.PromotionPO;
 import com.chihuo.food.domain.seller.service.SellerDomainService;
 import com.chihuo.food.infrastructure.common.api.RedisKey;
 import com.chihuo.food.infrastructure.common.api.ResponseStatus;
+import com.chihuo.food.infrastructure.common.api.value.Locks;
 import com.chihuo.food.infrastructure.common.api.value.Unit;
+import com.chihuo.food.infrastructure.common.cache.DistributedCacheComponent;
+import com.chihuo.food.infrastructure.common.cache.DistributedLocksComponent;
 import com.chihuo.food.infrastructure.common.event.EventPublisher;
 import com.chihuo.food.infrastructure.common.exception.BusinessException;
 import com.chihuo.food.infrastructure.consumer.UidClientComponent;
@@ -61,6 +64,10 @@ public class FoodDomainService {
     private FoodStockRepository foodStockRepository;
     @Autowired
     private PromotionRepository promotionRepository;
+    @Autowired
+    private DistributedLocksComponent locksComponent;
+    @Autowired
+    private DistributedCacheComponent cacheComponent;
     @Autowired
     private FoodFactory foodFactory;
 
@@ -204,6 +211,44 @@ public class FoodDomainService {
 			}
 		}
 		return null;
+	}
+	
+	public FoodStock findFoodStockByFoodSellerId(Long foodId, Long sellerId) {
+		String key = foodId + "_" + sellerId;
+		String value = this.cacheComponent.get(RedisKey.KEY_FOOD_STOCK, key);
+		FoodStock foodStock = null;
+		if(StringUtils.isEmpty(value)) {
+			FoodStockPO po = this.foodStockRepository.findFoodStockByFoodSellerId(foodId, sellerId).orElseThrow(() -> new BusinessException(ResponseStatus.DATA_NOT_EXISTS, "data not exists!!!"));
+			foodStock = this.foodFactory.createFoodStock(po);
+			this.cacheComponent.set(RedisKey.KEY_FOOD_STOCK, key, value);
+		} else {
+			foodStock = JSONObject.parseObject(value, FoodStock.class);
+		}
+		return foodStock;
+	}
+
+	public boolean updateFoodStock(Long foodId, Long sellerId, Integer stockNum) {
+		String lockKey = Locks.stockkey(foodId);
+		if(this.locksComponent.lock(lockKey)) {
+			String value = this.cacheComponent.get(RedisKey.KEY_FOOD_STOCK, foodId);
+			FoodStock foodStock = null;
+			if(null == value) {
+				FoodStockPO foodStockPO = this.foodStockRepository.findFoodStockByFoodSellerId(foodId, sellerId).orElseThrow(() -> new BusinessException(ResponseStatus.DATA_NOT_EXISTS, "data not exists!!!"));
+				foodStock = this.foodFactory.createFoodStock(foodStockPO);
+			} else {
+				if(log.isInfoEnabled()) {
+					log.info("findFoodStockByFoodId from cache!!!");
+				}
+				foodStock = JSONObject.parseObject(value, FoodStock.class);
+			}
+			foodStock.setStockNum(stockNum);
+			this.cacheComponent.set(RedisKey.KEY_FOOD_STOCK, foodId, JSONObject.toJSONString(foodStock));
+			this.foodStockRepository.updateFoodStock(foodId, sellerId, stockNum);
+			return this.locksComponent.release(lockKey);
+		} else {
+			log.error("can not get distributed locks, lockKey={}", lockKey);
+			return false;
+		}
 	}
 	
 }

@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: client-1
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/test?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
+    username: root
+    password: root
+server:
+  port: 6123
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:7001/eureka/
+  instance:
+    # 注册名
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}
+    # 设置注册到服务的为ip
+    prefer-ip-address: true
+
+tx-lcn:
+  primary-key-package: com.springcloud.feignclient
+  client:
+    manager-address: 127.0.0.1:8070
+  logger:
+    enabled: true
+
+mybatis:
+  mapper-locations: classpath:/mapper/*Dao.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    use-generated-keys: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  level:
+    com.springcloud.feignclient: debug
+    com.codingapi.txlcn: debug

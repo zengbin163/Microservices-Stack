@@ -2,7 +2,7 @@ package com.chihuo.sharding.infrastructure.algorithm.value;
 
 public enum ShardingPrefix {
 
-	DATABASE_PREFIX("saleorder0", "database prefix"), 
+	DATABASE_PREFIX("saleorder-master0", "database prefix"), 
 	TABLE_ORDER_PREFIX("f_order_", "tables prefix"),
 	TABLE_ORDER_ITEM_PREFIX("f_order_item_", "tables prefix"),
 	;

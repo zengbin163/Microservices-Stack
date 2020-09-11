@@ -13,8 +13,8 @@ eureka:
       registerWithEureka: false    #是否要注册到eureka
       fetchRegistry: false         #表示是否从Eureka Server获取注册信息
       serviceUrl:
-         #defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/   #单机配置
-         defaultZone: http://eureka-server02.com:7002/eureka/   #集群配置,如果有多个,用逗号分割,不要包含自己
+         defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/   #单机配置
+         #defaultZone: http://eureka-server02.com:7002/eureka/   #集群配置,如果有多个,用逗号分割,不要包含自己
    server:
       eviction-interval-timer-in-ms: 5000  #Eureka_Client应用异常挂掉但是没有在挂掉前告知Eureka-Server服务，Eureka-Server服务没有下线挂掉的Eureka-Client服务实例信息。解决该问题可以依赖Eureka-Server 的 EvictionTask去剔除已下线的Eureka-client服务实例信息。可以在Eureka-Server服务中调整EvictionTask的调度频率，比如将调度间隔从默认的60秒，调整为5秒
       use-read-only-response-cache: false  #Eureka-Client应用实例下线时告知Eureka-Server了，但是Eureka-Server的REST API有response cache缓存，所以需要等待缓存过期后才能更新。可以根据情况考虑在Eureka-Server服务中关闭readOnlyCacheMap

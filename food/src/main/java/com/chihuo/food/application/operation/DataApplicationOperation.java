@@ -85,12 +85,14 @@ public class DataApplicationOperation {
 		        	ShoppingCat shoppingCat = new ShoppingCat();
 		        	Long userId = ShoppingCat.userId();
 					Map<Long, Integer> shoppingFoodList = new HashMap<>();
-		        	List<Long> sellerFoodIds = ShoppingCat.randomSellerFoodIds();
+		        	List<Long> sellerFoodIds = ShoppingCat.randomSellerFoodIds(3);
 		    		for(Long sellerFoodId : sellerFoodIds) {
 		    			Integer sum = (int) (Math.random() * 20 + 1);
 		    	    	shoppingFoodList.put(sellerFoodId, sum);
 		    		}
 		        	shoppingCat.setShoppingFoodList(shoppingFoodList);
+		        	String couponJson = this.couponClientComponent.findUserCouponByUid(ShoppingCat.couponId());
+		        	shoppingCat.setCoupon(JSONObject.parseObject(couponJson));
 		        	long createOrderBeginTime = System.currentTimeMillis();
 		        	this.userDomainService.createOrder(userId, shoppingCat);
 		        	long createOrderEndTime = System.currentTimeMillis();

@@ -17,9 +17,11 @@ public class MessageProducerApi {
     private MessageProducerComponent producer;
 
 	@RequestMapping(value = "/send", method = RequestMethod.GET)
-	public String send(@RequestParam(value = "key") String key, @RequestParam(value = "value") String value) {
-	    //调用远程服务 http请求
-		return this.producer.send(key, value);
+	public String send(
+			@RequestParam(value = "topic") String topic,
+			@RequestParam(value = "key") String key, 
+			@RequestParam(value = "value") String value) throws Exception {
+		return this.producer.send(topic, key, value);
 	}
 
 }

@@ -3,6 +3,9 @@ package com.chihuo.sharding.domain.order.repository.po;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import com.codingapi.txlcn.tc.annotation.TableId;
+import com.codingapi.txlcn.tc.annotation.TableName;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,8 +15,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@TableName(value = "t_user")
 public class OrderItemPO {
-	
+	@TableId(value = "uid")
     private Long uid;
     private Long userId;
     private Long sellerId;

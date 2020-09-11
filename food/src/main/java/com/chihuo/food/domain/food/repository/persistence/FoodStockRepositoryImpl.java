@@ -1,6 +1,7 @@
 package com.chihuo.food.domain.food.repository.persistence;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -21,8 +22,8 @@ public class FoodStockRepositoryImpl implements FoodStockRepository {
 	}
 
 	@Override
-	public void updateFoodStock(Long foodId, Integer stockNum, Integer version) {
-		this.foodStockDao.updateFoodStock(foodId, stockNum, version);
+	public void updateFoodStock(Long foodId, Long sellerId, Integer stockNum) {
+		this.foodStockDao.updateFoodStock(foodId, sellerId, stockNum);
 	}
 
 	@Override
@@ -31,8 +32,8 @@ public class FoodStockRepositoryImpl implements FoodStockRepository {
 	}
 	
 	@Override
-	public FoodStockPO findFoodStockByFoodId(Long foodId) {
-		return this.foodStockDao.findFoodStockByFoodId(foodId);
+	public Optional<FoodStockPO> findFoodStockByFoodSellerId(Long foodId, Long sellerId) {
+		return this.foodStockDao.findFoodStockByFoodSellerId(foodId, sellerId);
 	}
 
 	@Override

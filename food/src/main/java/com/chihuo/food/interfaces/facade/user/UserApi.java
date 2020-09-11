@@ -26,9 +26,12 @@ public class UserApi {
 	@RequestMapping(value = "/createOrder", method = RequestMethod.POST)
     @ResponseBody
     @NoLogin
-    public Response createOrder(@RequestParam(value = "userId") Long userId, @RequestParam(value = "shoppingCat") String shoppingCat) throws Exception {
+    public Response createOrder(
+    		@RequestParam(value = "userId") Long userId, 
+    		@RequestParam(value = "couponId") Long couponId, 
+    		@RequestParam(value = "shoppingCat") String shoppingCat) throws Exception {
     	Map<Long, Integer> shoppingFoodList = JSONObject.parseObject(shoppingCat, Map.class);
-    	BigDecimal payAmount = this.userApplicationService.createSingleOrder(userId, shoppingFoodList);
+    	BigDecimal payAmount = this.userApplicationService.createSingleOrder(userId, couponId, shoppingFoodList);
     	return Response.ok(payAmount);
     }
     

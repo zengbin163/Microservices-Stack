@@ -64,9 +64,9 @@ public class DynamicDataSourceInterceptor implements Interceptor {
         }
         
         DynamicDataSourceHolder.setDataSourceType(dataBaseSourceType);
-        
-        LOGGER.error("======DynamicDataSourceInterceptor.intercept, synchronizationActive={}, dataBaseSourceType={}", synchronizationActive, dataBaseSourceType);
-        
+        if(LOGGER.isWarnEnabled()) {
+        	LOGGER.warn("======DynamicDataSourceInterceptor.intercept, synchronizationActive={}, dataBaseSourceType={}", synchronizationActive, dataBaseSourceType);
+        }
         return invocation.proceed();
     }
 

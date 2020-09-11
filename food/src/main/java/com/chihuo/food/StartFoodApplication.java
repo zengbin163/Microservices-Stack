@@ -9,8 +9,11 @@ import org.springframework.cloud.netflix.hystrix.EnableHystrix;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import com.codingapi.txlcn.tc.config.EnableDistributedTransaction;
+
 @SpringBootApplication
 @EnableTransactionManagement
+@EnableDistributedTransaction
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
 @EnableHystrix
 @EnableFeignClients

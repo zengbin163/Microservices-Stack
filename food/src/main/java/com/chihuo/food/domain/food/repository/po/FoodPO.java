@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import com.chihuo.food.domain.category.repository.po.CategoryPO;
+import com.codingapi.txlcn.tc.annotation.TableId;
+import com.codingapi.txlcn.tc.annotation.TableName;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,8 +16,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@TableName(value = "food")
 public class FoodPO {
-	
+	@TableId(value = "uid")
     private Long uid;
     private CategoryPO parentCategory;
     private CategoryPO category;
@@ -25,5 +28,4 @@ public class FoodPO {
     private BigDecimal price;
     private Date createTime;
     private Date updateTime;
-    
 }

@@ -2,7 +2,7 @@ spring:
    cloud:
       config:
                            #配置文件的名字
-         name: order
+         name: order-sharding
                            #配置文件后缀，主要是用来区分环境版本
          profile: dev
                            #分支

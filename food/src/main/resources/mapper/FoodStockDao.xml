@@ -22,9 +22,8 @@
 	
 	<update id="updateFoodStock">
 		update f_food_stock 
-			set stock_num = #{stockNum},
-				version = #{version} + 1
-		where food_id = #{foodId} and version = #{version}		
+			set stock_num = #{stockNum}
+		where food_id = #{foodId} and seller_id = #{sellerId}
 	</update>
 	
 	<update id="updateSellerId">
@@ -33,7 +32,7 @@
 		where food_id = #{foodId}
 	</update>
     
-    <select id="findFoodStockByFoodId" parameterType="Long" resultType="com.chihuo.food.domain.food.repository.po.FoodStockPO">
+    <select id="findFoodStockByFoodSellerId" parameterType="Long" resultType="com.chihuo.food.domain.food.repository.po.FoodStockPO">
         select f.uid uid,
         	   f.seller_id sellerId,
         	   f.food_id foodId,
@@ -41,7 +40,7 @@
         	   f.version version,
         	   f.create_time createTime
         from f_food_stock f
-        where f.food_id = #{foodId}
+        where f.food_id = #{foodId} and f.seller_id = #{sellerId}
     </select>
     
     <select id="findFoodStockList" resultType="com.chihuo.food.domain.food.repository.po.FoodStockPO">

@@ -49,7 +49,8 @@ public class CacheOpsApplicationOperation {
 		List<FoodStock> foodStockList = this.foodDomainService.findFoodStockList();
 		for(FoodStock foodStock : foodStockList) {
 			String value = JSONObject.toJSONString(foodStock);
-			this.distributedCacheComponent.set(RedisKey.KEY_FOOD_STOCK, foodStock.getFoodId(), value);
+			String key = foodStock.getFoodId() + "_" + foodStock.getSellerId();
+			this.distributedCacheComponent.set(RedisKey.KEY_FOOD_STOCK, key, value);
 		}
 		log.error("CacheRefreshApplicationService.refreshFoodStock end...{} foodStock was cached", foodStockList.size());
 	}

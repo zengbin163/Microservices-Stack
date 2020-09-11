@@ -15,7 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
+import com.chihuo.api.component.event.value.CouponEventType;
+import com.chihuo.api.component.topic.Topic;
 import com.chihuo.food.domain.food.entity.Food;
+import com.chihuo.food.domain.food.entity.FoodStock;
 import com.chihuo.food.domain.food.entity.Promotion;
 import com.chihuo.food.domain.food.service.FoodDomainService;
 import com.chihuo.food.domain.order.entity.Order;
@@ -26,6 +29,7 @@ import com.chihuo.food.domain.seller.service.SellerDomainService;
 import com.chihuo.food.domain.user.entity.ShoppingCat;
 import com.chihuo.food.domain.user.entity.User;
 import com.chihuo.food.domain.user.entity.UserAccount;
+import com.chihuo.food.domain.user.event.CouponEvent;
 import com.chihuo.food.domain.user.repository.facade.UserAccountRepository;
 import com.chihuo.food.domain.user.repository.facade.UserRepository;
 import com.chihuo.food.domain.user.repository.po.UserAccountPO;
@@ -35,17 +39,16 @@ import com.chihuo.food.infrastructure.common.api.ResponseStatus;
 import com.chihuo.food.infrastructure.common.api.value.Locks;
 import com.chihuo.food.infrastructure.common.cache.DistributedCacheComponent;
 import com.chihuo.food.infrastructure.common.cache.DistributedLocksComponent;
+import com.chihuo.food.infrastructure.common.event.EventPublisher;
 import com.chihuo.food.infrastructure.common.exception.BusinessException;
-import com.chihuo.food.infrastructure.consumer.CouponClientComponent;
 import com.chihuo.food.infrastructure.consumer.UidClientComponent;
+import com.codingapi.txlcn.tc.annotation.LcnTransaction;
 
 @Service
 public class UserDomainService {
 	
 	@Resource
 	private UidClientComponent uidClientComponent;
-	@Resource
-	private CouponClientComponent couponClientComponent;
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired
@@ -62,10 +65,11 @@ public class UserDomainService {
 	private DistributedCacheComponent cacheComponent;
 	@Autowired
 	private UserFactory userFactory;
+	@Autowired
+	private EventPublisher publisher;
 
 	private static final Logger log = LoggerFactory.getLogger(UserDomainService.class);
 	
-	@Transactional(rollbackFor = Exception.class)
 	public BigDecimal createSingleOrder(Long userId, ShoppingCat shoppingCat) {
 		long beginTime = System.currentTimeMillis();
 		BigDecimal payAmount = this.createOrder(userId, shoppingCat);
@@ -76,6 +80,8 @@ public class UserDomainService {
 		return payAmount;
 	}
 	
+	@LcnTransaction
+	@Transactional(rollbackFor = Exception.class)
 	public BigDecimal createOrder(Long userId, ShoppingCat shoppingCat) {
 		Long orderId = this.uidClientComponent.getUID();
 		BigDecimal totalAmount = BigDecimal.ZERO;
@@ -107,27 +113,39 @@ public class UserDomainService {
 				orderItem.setPromotionAmount(promotion.getDeductAmount());
 			}
 			JSONObject coupon = shoppingCat.getCoupon();
-			if(null != coupon && food.getCategory().getId().equals(coupon.getInteger("categoryId"))) {
+			if(null != coupon) {
 				BigDecimal couponDeductAmount = coupon.getBigDecimal("deductAmount");
 				if(orderItemAmount.compareTo(couponDeductAmount) <1) {
 					orderItemAmount = BigDecimal.ZERO;
 				} else {
 					orderItemAmount = orderItemAmount.subtract(couponDeductAmount);
 				}
-				this.couponClientComponent.use(coupon.getLong("uid"));
-				orderItem.setCouponId(coupon.getLong("uid"));
+				Long couponId = coupon.getLong("uid");
+				orderItem.setCouponId(couponId);
 				orderItem.setCouponAmount(couponDeductAmount);
+				
+				this.publisher.publish(CouponEvent.create(Topic.TOPIC_COUPON_SERVICE, CouponEventType.COUPON_USE, couponId.toString()));
 			}
-			Long orderItemId = this.uidClientComponent.getUID();
-			orderItem.setUid(orderItemId);
-			orderItem.setUserId(userId);
-			orderItem.setSellerId(sellerId);
-			orderItem.setFoodId(food.getUid());
-			orderItem.setOrderId(orderId);
-			orderItem.setFoodName(food.getFoodName());
-			orderItem.setOrderItemAmount(orderItemAmount);
-			orderItem.setOrderItemSum(orderItemSum);
-			this.orderDomainService.saveOrderItem(orderItem);
+			
+			FoodStock foodStock = this.foodDomainService.findFoodStockByFoodSellerId(sellerFood.getFoodId(), sellerFood.getSellerId());
+			if(null == foodStock || foodStock.getStockNum() < orderItemSum) {
+				log.error("foodId:{},sellerId:{} stock not enough!!!", sellerFood.getFoodId(), sellerFood.getSellerId());
+				continue;
+			}
+			boolean flag = this.foodDomainService.updateFoodStock(sellerFood.getFoodId(), sellerFood.getSellerId(), (foodStock.getStockNum()-orderItemSum));
+			
+			if(flag) {
+				Long orderItemId = this.uidClientComponent.getUID();
+				orderItem.setUid(orderItemId);
+				orderItem.setUserId(userId);
+				orderItem.setSellerId(sellerId);
+				orderItem.setFoodId(food.getUid());
+				orderItem.setOrderId(orderId);
+				orderItem.setFoodName(food.getFoodName());
+				orderItem.setOrderItemAmount(orderItemAmount);
+				orderItem.setOrderItemSum(orderItemSum);
+				this.orderDomainService.saveOrderItem(orderItem);
+			}
 			
 			totalAmount = totalAmount.add(orderItemAmount);
 			logOrderItemList.add(orderItem);

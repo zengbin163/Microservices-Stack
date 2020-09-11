@@ -1,0 +1,99 @@
+操作kafka：
+  ./bin/kafka-topics.sh --create --zookeeper 127.0.0.1:2181 --replication-factor 1 --partitions 1 --topic food
+说明： 
+	--zookeeper：为zk服务器地址，已逗号分割配置多个 
+	--replication-factor：分区leader副本数,1代表没有副本即分区本身，建议为2 
+	--partitions：分区数 
+	--topic：topic名称
+查看topic：
+  ./bin/kafka-topics.sh --list --zookeeper 127.0.0.1:2181
+查看test topic消息
+  ./bin/kafka-topics.sh --describe --zookeeper 127.0.0.1:2181 --topic food
+发布消息
+  ./bin/kafka-console-producer.sh --broker-list 127.0.0.1:9092 --topic food
+消费消息
+  ./bin/kafka-console-consumer.sh --bootstrap-server 127.0.0.1:9092 --topic food --from-beginning
+删除topic
+  ./bin/kafka-topics.sh --delete --zookeeper 127.0.0.1:2181 --topic food
+
+查看consumer group
+
+
+nohup java -jar -Xms512m -Xmx512m kafka-notify.jar >kafka-notify.log 2>&1 &
+nohup java -jar -Xms512m -Xmx512m uid.jar >uid.log 2>&1 &
+nohup java -jar -Xms512m -Xmx512m food.jar >food.log 2>&1 &
+
+
+eureka-server01   7001
+eureka-server02   7002
+zuul01   7003
+zuul02   7004
+hystrix-dashboard   7005 
+hystrix-turbine   7006
+spring-cloud-config-server   7007
+spring-cloud-config-server   7008
+
+uid       8101 8102 8103 8104 8105
+kafka-notify      8201 8202 8203 8204 8205
+food       8301 8302 8303 8304 8305
+
+网关对应的外网nginx端口为  8888
+
+
+
+##########################################################famiao#####################################################
+测试环境
+
+nohup java -jar -Xms512m -Xmx512m fm-eureka-server-01.jar >fm-eureka-server-01.log 2>&1 &
+nohup java -jar -Xms512m -Xmx512m fm-eureka-server-02.jar >fm-eureka-server-02.log 2>&1 &
+nohup java -jar -Xms512m -Xmx512m fm-config-server-01.jar >fm-config-server-01.log 2>&1 &
+nohup java -jar -Xms512m -Xmx512m fm-config-server-02.jar >fm-config-server-02.log 2>&1 &
+nohup java -jar -Xms512m -Xmx512m fm-zuul-01.jar >fm-zuul-01.log 2>&1 &
+nohup java -jar -Xms512m -Xmx512m fm-zuul-02.jar >fm-zuul-02.log 2>&1 &
+
+nohup java -jar -Xms1024m -Xmx1024m kafka-notify.jar >kafka-notify.log 2>&1 &
+nohup java -jar -Xms1024m -Xmx1024m fm-uid.jar >fm-uid.log 2>&1 &
+nohup java -jar -Xms1024m -Xmx1024m fm-famiao.jar >fm-famiao.log 2>&1 &
+
+
+http://mtest.famiaowang.com:8888/famiao/customer/sms?mobile=18867102687
+
+nohup java -jar -Xms512m -Xmx512m fm-eureka-server.jar >fm-eureka-server.log 2>&1 &
+nohup java -jar -Xms512m -Xmx512m fm-config-server.jar >fm-config-server.log 2>&1 &
+nohup java -jar -Xms512m -Xms512m fm-zuul.jar >fm-zuul.log 2>&1 &
+nohup java -jar -Xms1024m -Xmx1024m kafka-notify.jar >kafka-notify.log 2>&1 &
+nohup java -jar -Xms1024m -Xmx1024m fm-uid.jar >fm-uid.log 2>&1 &
+nohup java -jar -Xms1024m -Xmx1024m fm-famiao.jar >fm-famiao.log 2>&1 &
+
+
+http://mtest.famiaowang.com:8888/famiao/swagger-ui.html#/
+
+nohup java -jar -Xms512m -Xmx512m fm-zuul.jar >fm-zuul.log 2>&1 &
+nohup java -jar -Xms1024m -Xmx1024m fm-famiao.jar >fm-famiao.log 2>&1 &
+nohup java -jar -Xms1024m -Xmx1024m fm-static.jar >fm-static.log 2>&1 &
+
+mongodb 启动
+C:\Program Files\MongoDB\Server\4.4\bin>mongod.exe --dbpath c:\data\db
+redis   启动
+D:\Env\Redis\redis.bat redis.windows.conf
+
+java -jar zipkin-server-2.12.9-exec.jar --STORAGE_TYPE=mysql --MYSQL_HOST=127.0.0.1 --MYSQL_TCP_PORT=3306 --MYSQL_USER=root --MYSQL_PASS=r --MYSQL_DB=zipkin
+
+docker run --name zipkin -d -p 9411:9411 -e STORAGE_TYPE=mysql -e MYSQL_HOST=127.0.0.1 -e MYSQL_TCP_PORT=3306 -e MYSQL_USER=root -e MYSQL_PASS=root -e MYSQL_DB=zipkin openzipkin/zipkin
+
+
+
+
+mysql slave
+
+CHANGE MASTER TO
+         MASTER_HOST='127.0.0.1',
+         MASTER_USER='root',
+         MASTER_PASSWORD='root',
+         MASTER_LOG_FILE='master-bin.000001',
+         MASTER_LOG_POS=154;
+start slave;
+
+
+
+.\bin\windows\kafka-server-start.bat .\config\server.properties
